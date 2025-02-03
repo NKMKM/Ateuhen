@@ -1,0 +1,367 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities; 
+
+body{
+    color: white;
+    background-color: black;
+}
+
+
+.text-glow{
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+
+}
+.text-glow-hover {
+    transition: text-shadow 0.3s ease; /* Плавный переход для text-shadow */
+}
+  
+.text-glow-hover:hover {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+    transition: text-shadow 0.2s ease;
+}
+
+.custom-shadow {
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.6); /* начальная тень */
+    transition: box-shadow 0.3s ease-in-out; /* плавная анимация */
+}
+  
+/* Эффект при наведении */
+.custom-shadow:hover {
+    box-shadow: 0px 0px 25px rgba(211, 211, 211, 0.8); /* тень становится чуть темнее и больше */
+}
+
+.scale-hover{
+    transform: scale(1);
+    transition: transform 0.3s; /* Плавный переход */
+}
+
+.scale-hover:hover{
+    transform: scale(1.1); /* Увеличиваем размер на 10% */
+}
+
+.shadow-hover{
+    transition: shadow 0.3 ease-in-out;
+}
+.shadow-hover:hover{
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+/* Стили для контейнера слайдера */
+.swiper-container {
+    position: relative; /* Обязательно для правильного позиционирования кнопок */
+}
+  
+  /* Стили для кнопок навигации */
+.swiper-button-next,
+.swiper-button-prev {
+    position: absolute;
+    bottom: 10px; /* Расстояние от нижнего края */
+    right: 10px; /* Расстояние от правого края */
+    z-index: 10; /* Чтобы кнопки не были перекрыты слайдером */
+    width: 80px;
+    height: 80px;
+    background-color: black;
+    border: solid 2px white;
+    border-radius: 50px;
+    color:white;
+    display: flex;
+    margin-top: 320px;
+    transform: scale(0.8);
+    transition: transform 0.3s;
+}
+
+.swiper-button-next:hover{
+    transform: scale(0.9);
+}
+
+.swiper-button-prev:hover{
+    transform: scale(0.9);
+}
+  
+  /* Чтобы кнопки не перекрывали слайдер */
+.swiper-button-next {
+    right: 70px;
+}
+
+.swiper-button-prev {
+    left: 680px; /* Для левой кнопки, немного влево */
+}
+
+.swiper-pagination {
+    display: flex !important; /* Используем flexbox для выравнивания */
+    justify-content: flex-start !important; /* Выравнивание кружков по левому краю */
+    gap: 8px !important; /* Отступы между кружками */
+    position: absolute !important; /* Позиционирование в левом нижнем углу */
+    left: 10px !important; /* Расстояние от левого края */
+    bottom: 10px !important; /* Расстояние от нижнего края */
+    z-index: 10 !important; /* Обеспечиваем, чтобы пагинация была сверху */
+    align-items: center !important; /* Выравнивание кружков по вертикали по центру */
+}
+
+/* Стиль для всех кружков */
+.swiper-pagination-bullet {
+    background-color: white !important; /* Белый цвет для всех кружков */
+    width: 10px !important; /* Размер обычного кружка */
+    height: 10px !important; /* Размер обычного кружка */
+    border-radius: 50% !important; /* Сделаем их круглыми */
+    margin: 0 !important; /* Убираем дополнительные отступы */
+}
+
+/* Стиль для активного кружка */
+.swiper-pagination-bullet-active {
+    background-color: white !important; /* Белый цвет для активного кружка */
+    width: 15px !important; /* Увеличенный размер для активного кружка */
+    height: 15px !important; /* Увеличенный размер для активного кружка */
+    opacity: 0.7 !important; /* Прозрачность активного кружка */
+}
+
+.animated-underline {
+    position: relative;
+    display: inline-block;
+    font-size: 1.2em;
+    font-weight: normal;
+    text-decoration: none;
+    color: #027a48;
+    cursor: pointer;
+    padding-bottom: 2px; /* Отступ снизу для линии */
+}
+  
+.animated-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* Начало линии из центра */
+    width: 0; /* Исходная ширина линии */
+    height: 2px; /* Толщина линии */
+    background-color: #027a48; /* Цвет линии */
+    transition: width 0.4s ease, left 0.4s ease; /* Плавный переход */
+}
+  
+.animated-underline:hover::after {
+    width: 100%; /* Линия растягивается до полной ширины */
+    left: 0; /* Линия смещается влево, чтобы покрыть весь элемент */
+}
+
+
+.animated-underline-white {
+    position: relative;
+    display: inline-block;
+    font-size: 1.2em;
+    font-weight: normal;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+    padding-bottom: 2px; /* Отступ снизу для линии */
+}
+  
+.animated-underline-white::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* Начало линии из центра */
+    width: 0; /* Исходная ширина линии */
+    height: 2px; /* Толщина линии */
+    background-color: white; /* Цвет линии */
+    transition: width 0.4s ease, left 0.4s ease; /* Плавный переход */
+}
+  
+.animated-underline-white:hover::after {
+    width: 100%; /* Линия растягивается до полной ширины */
+    left: 0; /* Линия смещается влево, чтобы покрыть весь элемент */
+}
+
+.lift-on-hover {
+    transition: transform 0.3s ease-out;
+}
+
+.lift-on-hover:hover {
+    transform: translateY(-10px);
+}
+
+
+.popup-animation {
+    animation: fadeIn 0.5s ease-out;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+  
+.popup-animation.popup-open {
+    transform: scale(1);
+}
+  
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* #################### */  
+  
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    background: rgba(18, 18, 18, 0.6); 
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.5); 
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    transition: border-color 0.2s ease; 
+  }
+  
+  
+  .back-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: #333;
+    color: white;
+    border: 1px solid #333;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 3;
+    transition: all 0.3s ease;
+  }
+  
+  .back-btn:hover {
+    background: #444;
+    border-color: white;
+    transform: scale(1.05);
+  }
+  
+  .logo-placeholder {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  p a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  form {
+    width: 100%;
+  }
+  
+  input {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 1px solid #333;
+    background: #1c1c1c;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+  }
+  
+  input:focus {
+    border-color: white;
+  }
+  
+  input::placeholder {
+    color: #777;
+  }
+  
+  .primary-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  
+  .primary-btn:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+  }
+  .terms {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 2rem;
+  }
+  
+  .terms a {
+    color: white;
+    text-decoration: underline;
+  }
+  
+  .register-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .name-fields {
+    display: flex;
+    gap: 1rem; 
+  }
+  
+  .name-fields input {
+    width: calc(50% - 0.5rem);
+  }
+  
+  .register-form input {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 1px solid #333;
+    background: #1c1c1c;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+  }
+  
+  .register-form input:focus {
+    transition: border-color 0.3s ease;
+  }
+  
+  .register-form input::placeholder {
+    color: #777;
+  }
+  
+  .primary-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .primary-btn:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+  }
+  

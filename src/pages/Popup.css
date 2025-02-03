@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+.popup-container {
+  background-color: black;
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  border: 2px solid gray; 
+}
+
+.popup-title {
+  font-weight: bold;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+
+.popup-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.accept-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+.text-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  position: relative;
+  font-family: 'Bebas Neue', sans-serif;
+  will-change: transform, opacity; 
+}
+
+.text-part {
+  position: absolute;
+  opacity: 0;
+  transition: transform 1s ease, opacity 1s ease;
+  white-space: nowrap;
+  font-family: 'Bebas Neue', sans-serif; 
+}
+
+.text-container.animate .left {
+  transform: translate3d(0, 0, 0); 
+  opacity: 1;
+}
+
+.text-container.animate .right {
+  transform: translate3d(0, 0, 0); 
+  opacity: 1;
+}
+
+.left {
+  transform: translate3d(-100%, 0, 0); 
+  clip-path: inset(50% 0 0 0); 
+}
+
+.right {
+  transform: translate3d(100%, 0, 0); 
+  clip-path: inset(0 0 50% 0); 
+}
+
+.text-container.glitch .text-part {
+  animation: glitch 0.2s forwards;
+}
+
+@keyframes glitch {
+    0% {
+      transform: translateX(0);
+      clip-path: inset(0 0 0 0);
+    }
+    10% {
+      transform: translateX(-5px);
+      clip-path: inset(50% 0 0 0);
+    }
+    20% {
+      transform: translateX(5px);
+      clip-path: inset(0 0 50% 0);
+    }
+    30% {
+      transform: translateX(-3px);
+      clip-path: inset(50% 0 0 0);
+    }
+    40% {
+      transform: translateX(3px);
+      clip-path: inset(0 0 50% 0);
+    }
+    50% {
+      transform: translateX(-2px);
+      clip-path: inset(50% 0 0 0);
+    }
+    60% {
+      transform: translateX(2px);
+      clip-path: inset(0 0 50% 0);
+    }
+    70% {
+      transform: translateX(-1px);
+      clip-path: inset(50% 0 0 0);
+    }
+    80% {
+      transform: translateX(1px);
+      clip-path: inset(0 0 50% 0);
+    }
+    90% {
+      transform: translateX(0);
+      clip-path: inset(0 0 0 0);
+    }
+    100% {
+      transform: translateX(0);
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  
