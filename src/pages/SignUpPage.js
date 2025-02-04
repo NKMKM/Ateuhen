@@ -7,6 +7,7 @@ import './SignUpPage.css';
 import axios from 'axios';
 
 const SignUpPage = () => {
+  /* условно поменяй че хочешь, один хуй фиксить надо*/
   const [borderColor, setBorderColor] = useState('rgba(255, 255, 255, 0.5)');
   const [error, setError] = useState('');  
 
