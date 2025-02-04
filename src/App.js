@@ -6,7 +6,6 @@ import SignupPage from './pages/SignUpPage';
 import HomePage from './pages/Home';
 import NotFound from './info_pages/NotFound';
 import MainPage from './info_pages/Home';
-import Nav from './info_pages/page_components/Nav'
 import Footer from './info_pages/page_components/Footer'
 
 const PrivateRoute = ({ children }) => {
@@ -27,7 +26,6 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <Nav/>
         <Routes>
           <Route path="/login" element={<RedirectIfAuthenticated component={<LoginPage />} />} />
           <Route path="/signup" element={<RedirectIfAuthenticated component={<SignupPage />} />} />

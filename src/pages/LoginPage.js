@@ -47,7 +47,7 @@ const LoginPage = () => {
           borderColor: borderColor,
         }}
       >
-        <Link to="/signup">
+        <Link to="/">
           <BackButton />
         </Link>
         <div className="login-box">

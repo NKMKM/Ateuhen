@@ -45,8 +45,12 @@ const Nav = () => {
           </li>
         </ul>
         <div className='flex space-x-10 mr-10 '>
-          <button className='border-2 rounded-[10px] w-[80px] h-[40px]  hover:bg-gray-300 hover:text-black  hover:scale-105 transition duration-300 ' href="/login">Log in</button>
-          <button className='border-2 rounded-[10px] w-[100px] h-[40px]  hover:bg-gray-300 hover:text-black hover:scale-105 transition duration-300' href="/signup">Register</button>
+        <Link to="/login">
+          <button className='border-2 rounded-[10px] w-[80px] h-[40px]  hover:bg-gray-300 hover:text-black  hover:scale-105 transition duration-300 ' >Log in</button>
+        </Link>
+        <Link to="/signup">
+          <button className='border-2 rounded-[10px] w-[100px] h-[40px]  hover:bg-gray-300 hover:text-black hover:scale-105 transition duration-300' >Register</button>
+        </Link>
         </div>
       </nav>
       <div className='w-[100%] bg-white h-[1px]'></div>
