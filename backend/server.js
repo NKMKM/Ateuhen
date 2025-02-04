@@ -4,18 +4,21 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
+const useragent = require('express-useragent');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(useragent.express());
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3000', 
-  credentials: true, 
+  origin: 'http://localhost:3000', // Frontend URL
+  credentials: true, // Для работы с cookies
 }));
 
+app.set('trust proxy', true);  // Для работы с прокси
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -25,87 +28,66 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+const SECRET = process.env.JWT_SECRET;
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user.id, firstName: user.first_name, email: user.email },
-    JWT_SECRET,
-    { expiresIn: '1h' } 
-  );
-};
-
-app.post('/auth/signup', async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+app.post('/auth/register', async (req, res) => {
+  const { first_name, second_name, nickname, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const created_at = new Date();
 
   try {
-    const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await pool.query(
-      'INSERT INTO users (first_name, last_name, email, password, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, first_name, email',
-      [firstName, lastName, email, hashedPassword]
+    const result = await pool.query(
+      "INSERT INTO users (first_name, second_name, nickname, email, password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [first_name, second_name, nickname, email, hashedPassword, created_at]
     );
-
-    const token = generateToken(newUser.rows[0]);
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: false, 
-      sameSite: 'strict',
-    });
-
-    res.status(201).json({ message: 'User created', user: newUser.rows[0] });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: 'Server error' });
+    res.status(201).json({ message: "User registered", user: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
 
+  const ipAddress = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
+
   try {
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (user.rows.length === 0) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (result.rows.length === 0) return res.status(400).json({ error: "User not found" });
 
-    const isMatch = await bcrypt.compare(password, user.rows[0].password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
+    const user = result.rows[0];
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = generateToken(user.rows[0]);
+    const platform = req.useragent ? req.useragent.platform : 'Unknown platform';
+    const browser = req.useragent ? req.useragent.browser : 'Unknown browser';
+
+    console.log('User logged in from platform:', platform, 'and browser:', browser, 'IP Address:', ipAddress);
+
+    const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: '1h' });
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, 
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',  // Only for HTTPS in production
+      sameSite: 'Strict',  // Prevent CSRF attacks
     });
 
-    res.status(200).json({ message: 'Logged in', user: { id: user.rows[0].id, firstName: user.rows[0].first_name, email: user.rows[0].email } });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: 'Server error' });
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
 app.get('/auth/check', (req, res) => {
   const token = req.cookies.token;
-
   if (!token) {
     return res.status(401).json({ message: 'Not authenticated' });
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, SECRET);
+    console.log('Authenticated user:', decoded);
     res.status(200).json({ user: decoded });
   } catch (error) {
     console.error(error.message);
@@ -117,7 +99,7 @@ app.post('/auth/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
     secure: false,
-    sameSite: 'strict',
+    sameSite: 'Strict',
   });
   res.status(200).json({ message: 'Logged out' });
 });

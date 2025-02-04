@@ -1,62 +1,81 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import RegisterForm from '../components/RegisterForm';
-import BackButton from '../components/BackButton';
-import Terms from '../components/Terms';
-import './SignUpPage.css';
-import axios from 'axios';
+import React, { useState } from "react";
 
-const SignUpPage = () => {
-  /* условно поменяй че хочешь, один хуй фиксить надо*/
-  const [borderColor, setBorderColor] = useState('rgba(255, 255, 255, 0.5)');
-  const [error, setError] = useState('');  
+const RegisterForm = () => {
+  const [firstName, setFirstName] = useState("");
+  const [secondName, setSecondName] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleMouseMove = () => {
-    setBorderColor('rgba(255, 255, 255, 1)');
-  };
-
-  const handleMouseLeave = () => {
-    setBorderColor('rgba(255, 255, 255, 0.5)');
-  };
-
-  
-  const handleSubmit = async (formData) => {
+  const handleRegister = async (e) => {
+    e.preventDefault(); // Prevent form submission
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+    
     try {
-      const response = await axios.post('http://localhost:5000/auth/signup', formData);
-      console.log(response.data);  
-      
+      const response = await fetch("http://localhost:5000/auth/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: firstName,
+          second_name: secondName,
+          nickname,
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      alert(data.message || data.error);
     } catch (error) {
-      console.error(error.response.data);
-      setError(error.response.data.message);  
+      alert("An error occurred during registration.");
     }
   };
 
   return (
-    <div className="background">
-      <div
-        className="login-container"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          borderColor: borderColor, 
-        }}
-      >
-        <Link to="/">
-          <BackButton />
-        </Link>
-        <div className="login-box">
-          <div className="logo-placeholder"></div>
-          <h1>Sign up</h1>
-          <p>
-            You already have an account? <Link to="/">Log In!</Link>
-          </p>
-          <RegisterForm onSubmit={handleSubmit} />
-          {error && <p style={{ color: 'red' }}>{error}</p>}  
-          <Terms />
-        </div>
-      </div>
+    <div>
+      <input
+        type="text"
+        placeholder="First Name"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Second Name"
+        value={secondName}
+        onChange={(e) => setSecondName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Nickname"
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Confirm Password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+      />
+      <button onClick={handleRegister}>Register</button>
     </div>
   );
 };
 
-export default SignUpPage;
+export default RegisterForm;
