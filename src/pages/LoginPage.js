@@ -7,6 +7,9 @@ import BackButton from '../components/BackButton';
 import "../App.css";
 
 const LoginPage = () => {
+  
+  /* Сюда закинь все функции которые будут связаны с паролем/email/и другие */
+
   const [borderColor, setBorderColor] = useState('rgba(255, 255, 255, 0.5)');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false); 
@@ -38,6 +41,7 @@ const LoginPage = () => {
   };
 
   return (
+    /* Тут поиграйся по большей части с div'ами и попробуй не менять функции plaveholderov*/
     <div className="background">
       <div
         className="login-container"
