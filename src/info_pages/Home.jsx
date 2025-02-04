@@ -5,6 +5,7 @@ import HomeInfoTwo from '../info_pages/page_components/home_components/HomeInfoT
 import HomeInfoThree from '../info_pages/page_components/home_components/HomeInfoThree';
 import Blog from './page_components/home_components/Blog';
 import Nav from './page_components/Nav';
+import Footer from './page_components/Footer';
 // Ateuhen-main\src\info_pages\page_components\home_components\Blog.jsx
 const MainPage = () => {
   return (
@@ -15,6 +16,7 @@ const MainPage = () => {
         <HomeInfoTwo/>
         <HomeInfoThree/>
         <Blog/>
+        <Footer/>
     </>
   )
 }

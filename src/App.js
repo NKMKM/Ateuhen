@@ -6,7 +6,6 @@ import SignupPage from './pages/SignUpPage';
 import HomePage from './pages/Home';
 import NotFound from './info_pages/NotFound';
 import MainPage from './info_pages/Home';
-import Footer from './info_pages/page_components/Footer'
 
 const PrivateRoute = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -33,7 +32,6 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<MainPage />} />
         </Routes>
-        <Footer/>
       </Router>
     </AuthProvider>
   );
