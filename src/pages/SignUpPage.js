@@ -9,7 +9,7 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleRegister = async (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault(); 
     if (password !== confirmPassword) {
       alert("Passwords do not match.");
       return;
