@@ -1,7 +1,7 @@
 import React from 'react'
 import { LuBox } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
-
+import { Link } from 'react-router-dom';
 const HomeInfoTwo = () => {
   return (
     <div className='w-[85%] mx-auto my-40 '>
@@ -19,7 +19,7 @@ const HomeInfoTwo = () => {
             <p>Participate in both free and paid tournaments to win amazing rewards.</p>
             <div className="flex flex-row">
               <button className="flex items-center  rounded-lg  py-2 group scale-hover">
-              <span>Sign in</span>
+              <Link to="/login"><span>Sign in</span></Link>
               <MdKeyboardArrowRight className="ml-2 transform transition-transform duration-300 group-hover:translate-x-2" />
               </button>
             </div>
@@ -47,7 +47,7 @@ const HomeInfoTwo = () => {
             <p>Meet new friends, create teams, and engage with fellow gamers.</p>
             <div className="flex flex-row">
               <button className="flex items-center  rounded-lg  py-2 group scale-hover">
-              <span>Sign Up</span>
+              <Link to="/register"><span>Sign Up</span></Link>
               <MdKeyboardArrowRight className="ml-2 transform transition-transform duration-300 group-hover:translate-x-2" />
               </button>
             </div>

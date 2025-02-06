@@ -1,6 +1,7 @@
 import React from 'react'
 import { LuBox } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { Link } from 'react-router-dom';
 
 
 const HomeInfoOne = () => {
@@ -44,7 +45,7 @@ const HomeInfoOne = () => {
             </button>
             <div className="flex flex-row">
                 <button className="flex items-center  rounded-lg px-4 py-2 group scale-hover">
-                <span>Sign in</span>
+                <Link to="/register"><span>Sign in</span></Link>
                 <MdKeyboardArrowRight className="ml-2 transform transition-transform duration-300 group-hover:translate-x-2" />
                 </button>
             </div>
