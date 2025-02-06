@@ -6,33 +6,33 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Состояние для пользователя
-  const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
+  const [user, setUser] = useState(null); 
+  const [isLoading, setIsLoading] = useState(true); 
 
-  // Проверяем аутентификацию при загрузке приложения
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await axios.get('http://localhost:5000/auth/check', {
-          withCredentials: true // Убедитесь, что cookies передаются с запросом
+          withCredentials: true 
         });
-        setUser(response.data.user); // Устанавливаем пользователя в состояние
+        setUser(response.data.user); 
       } catch (error) {
         console.error('Ошибка при проверке аутентификации', error);
-        setUser(null); // Если ошибка, очищаем пользователя
+        setUser(null); 
       }
-      setIsLoading(false); // Завершаем процесс загрузки
+      setIsLoading(false); 
     };
 
     checkAuth();
-  }, []); // useEffect с пустым массивом, чтобы выполнить один раз при монтировании компонента
+  }, []); 
 
   const login = async (formData) => {
     try {
       const response = await axios.post('http://localhost:5000/auth/login', formData, {
-        withCredentials: true, // Включаем cookies в запрос
+        withCredentials: true,
       });
-      setUser(response.data.user); // Обновляем пользователя
+      setUser(response.data.user); 
     } catch (error) {
       console.error('Ошибка при логине', error);
     }
@@ -41,9 +41,9 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post('http://localhost:5000/auth/logout', {}, {
-        withCredentials: true, // Включаем cookies в запрос
+        withCredentials: true,
       });
-      setUser(null); // Убираем пользователя
+      setUser(null); 
     } catch (error) {
       console.error('Ошибка при логауте', error);
     }

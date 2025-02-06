@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import '../App.css';
-import { useAuth } from './context/AuthContext'; // Импортируйте useAuth для использования контекста
+import { useAuth } from './context/AuthContext';
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false); // Состояние загрузки
+    const [loading, setLoading] = useState(false); 
     const navigate = useNavigate();
-    const { login } = useAuth(); // Получаем login из контекста
+    const { login } = useAuth();
 
     const handleLogin = async () => {
-        setLoading(true); // Запускаем индикатор загрузки
+        setLoading(true); 
         try {
             const res = await fetch("http://localhost:5000/auth/login", {
                 method: "POST",
@@ -21,17 +21,18 @@ const LoginForm = () => {
             const data = await res.json();
 
             if (res.ok) {
-                console.log('Login successful:', data); // Логируем данные после успешного входа
-                localStorage.setItem("token", data.token); // Сохраняем токен в localStorage
-                login(data); // Обновляем контекст
-                navigate("/home"); // Перенаправляем на страницу home
+                console.log('Login successful:', data); 
+                localStorage.setItem("token", data.token); 
+                login(data); 
+                navigate("/home"); 
             } else {
-                alert(data.error); // Если ошибка, показываем сообщение
+                alert(data.error); 
             }
         } catch (error) {
+            console.log(error.req)
             alert("Ошибка при подключении к серверу");
         } finally {
-            setLoading(false); // Завершаем загрузку
+            setLoading(false); 
         }
     };
 
