@@ -13,7 +13,7 @@ const LoginForm = () => {
     const handleLogin = async () => {
         setLoading(true); // Запускаем индикатор загрузки
         try {
-            const res = await fetch("http://localhost:5000/login", {
+            const res = await fetch("http://localhost:5000/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
