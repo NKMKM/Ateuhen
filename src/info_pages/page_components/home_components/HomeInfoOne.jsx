@@ -1,13 +1,38 @@
-import React from 'react'
+import { React, useEffect, useState, useRef} from 'react'
 import { LuBox } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from 'react-router-dom';
 
 
 const HomeInfoOne = () => {
+    const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); 
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className='flex flex-col items-center'>
-        <p className='font-bold text-s cursor-pointer text-glow-hover'>Join</p>
+<div
+      ref={ref}
+      className={`opacity-0 translate-y-10 transition-all duration-700 ease-out ${
+        isVisible ? "animate-fadeInUp opacity-100 translate-y-0" : ""
+      } flex flex-col items-center`}
+    >        <p className='font-bold text-s cursor-pointer text-glow-hover'>Join</p>
     {/* контейнер с текстом */}
         <div className='flex flex-col items-center m-10 w-[770px]'>
             <h1 className='text-5xl font-bold text-center m-5'>Experience Competitive Gaming Like Never Before</h1>
