@@ -35,24 +35,49 @@ const pool = new Pool({
 const SECRET = process.env.JWT_SECRET || 'defaultsecret';
 
 // Регистрация пользователя
-app.post('/auth/register', asyncHandler(async (req, res) => {
-  const { first_name, second_name, nickname, email, password } = req.body;
-  
-  // Простая валидация
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
+app.post('/auth/register', async (req, res) => {
+  const { first_name, second_name, email, nickname, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date();
 
-  const result = await pool.query(
-    "INSERT INTO users (first_name, second_name, nickname, email, password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [first_name, second_name, nickname, email, hashedPassword, created_at]
-  );
+  try {
+    // Создаем пользователя в базе
+    const userResult = await pool.query(
+      "INSERT INTO users (first_name, second_name, email, nickname, password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [first_name, second_name, email, nickname, hashedPassword, created_at]
+    );
 
-  res.status(201).json({ message: "User registered", user: result.rows[0] });
-}));
+    const user = userResult.rows[0];
+
+    // Генерируем токен
+    const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: '1h' });
+
+    // Логируем устройство пользователя
+    const platform = req.useragent?.platform || 'Unknown';
+    const browser = req.useragent?.browser || 'Unknown';
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
+
+    // Записываем вход в login_logs
+    await pool.query(
+      `INSERT INTO login_logs (user_id, device, browser, login_time, token, ip_address) 
+       VALUES ($1, $2, $3, NOW(), $4, $5)`,
+      [user.id, platform, browser, token, ipAddress]
+    );
+
+    // Устанавливаем куки с токеном
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    });
+
+    res.status(201).json({ message: "User registered successfully", user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // Логин пользователя
 app.post('/auth/login', asyncHandler(async (req, res) => {
