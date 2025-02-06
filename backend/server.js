@@ -1,10 +1,13 @@
+// server.js
+
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const useragent = require('express-useragent');
+const asyncHandler = require('express-async-handler');
 require('dotenv').config();
 
 const app = express();
@@ -18,6 +21,7 @@ app.use(cors({
   credentials: true,  
 }));
 
+// Для работы с прокси (например, Heroku)
 app.set('trust proxy', true);  
 
 const pool = new Pool({
@@ -28,89 +32,96 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET || 'defaultsecret';
 
-
-app.post('/auth/register', async (req, res) => {
+// Регистрация пользователя
+app.post('/auth/register', asyncHandler(async (req, res) => {
   const { first_name, second_name, nickname, email, password } = req.body;
+  
+  // Простая валидация
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date();
 
-  try {
-    const result = await pool.query(
-      "INSERT INTO users (first_name, second_name, nickname, email, password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [first_name, second_name, nickname, email, hashedPassword, created_at]
-    );
-    res.status(201).json({ message: "User registered", user: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  const result = await pool.query(
+    "INSERT INTO users (first_name, second_name, nickname, email, password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+    [first_name, second_name, nickname, email, hashedPassword, created_at]
+  );
 
+  res.status(201).json({ message: "User registered", user: result.rows[0] });
+}));
 
-app.post('/auth/login', async (req, res) => {
+// Логин пользователя
+app.post('/auth/login', asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
+  // Валидация входных данных
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
   const ipAddress = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
 
-  try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    if (result.rows.length === 0) {
-      return res.status(400).json({ error: "User not found" });
-    }
-
-    const user = result.rows[0];
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-
-    const platform = req.useragent ? req.useragent.platform : 'Unknown platform';
-    const browser = req.useragent ? req.useragent.browser : 'Unknown browser';
-    console.log('User logged in from platform:', platform, 'and browser:', browser, 'IP Address:', ipAddress);
-
-
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: '1h' });
-
-
-    res.cookie('token', token, {
-      httpOnly: true,  
-      secure: process.env.NODE_ENV === 'production',  
-      sameSite: 'Strict',  
-      maxAge: 3600 * 1000,  
-    });
-
-
-    res.status(200).json({ message: "Login successful" });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+  // Шаг 1: Ищем пользователя по email
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  if (result.rows.length === 0) {
+    return res.status(400).json({ error: "User not found" });
   }
-});
 
+  const user = result.rows[0];
 
-app.get('/auth/check', (req, res) => {
-  const token = req.cookies.token;  
+  // Шаг 2: Проверяем правильность пароля
+  const isValid = await bcrypt.compare(password, user.password);
+  if (!isValid) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  // Шаг 3: Генерация JWT токена
+  const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: '1h' });
+
+  // Логируем информацию о входе
+  const platform = req.useragent ? req.useragent.platform : 'Unknown platform';
+  const browser = req.useragent ? req.useragent.browser : 'Unknown browser';
+
+  // Шаг 4: Логируем информацию о входе в login_logs
+  await pool.query(
+    `INSERT INTO login_logs (user_id, device, browser, login_time, token, ip_address) 
+     VALUES ($1, $2, $3, NOW(), $4, $5)`,
+    [user.id, platform, browser, token, ipAddress]
+  );
+
+  // Шаг 5: Отправляем токен в cookie
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',  // только через HTTPS в продакшн
+    sameSite: 'Strict',  // защита от CSRF атак
+  });
+
+  // Шаг 6: Возвращаем данные пользователя
+  res.json({ message: "Login successful", user });
+}));
+
+// Проверка токена (это защищённый маршрут)
+app.get('/auth/check', asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
 
   if (!token) {
     return res.status(401).json({ message: 'Not authenticated' });
   }
 
   try {
-
     const decoded = jwt.verify(token, SECRET);
-    res.status(200).json({ user: decoded });  
+    res.status(200).json({ user: decoded });
   } catch (error) {
-    console.error(error.message);
-    res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
-});
+}));
 
-
-app.post('/auth/logout', (req, res) => {
-
+// Логаут пользователя
+app.post('/auth/logout', asyncHandler(async (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',  
@@ -118,8 +129,31 @@ app.post('/auth/logout', (req, res) => {
   });
 
   res.status(200).json({ message: 'Logged out successfully' });
+}));
+
+// Защищенный маршрут /home
+app.get('/home', asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    res.status(200).send(`Welcome to the home page, ${decoded.email}`);
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+}));
+
+// Обработчик ошибок
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
+// Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

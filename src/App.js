@@ -1,42 +1,44 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './pages/context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignUpPage';
 import HomePage from './pages/HomePage';
-import NotFound from './info_pages/NotFound';
-import MainPage from './info_pages/Home';
+import SignupPage from './pages/SignUpPage';
 
-const PrivateRoute = ({ children }) => {
-  const { user, isLoading } = useAuth();
+function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  if (isLoading) return <p>Loading...</p>;
-  return user ? children : <Navigate to="/login" />;
-};
+  // Проверяем, авторизован ли пользователь
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/check', { withCredentials: true });
+        setUser(response.data.user);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const RedirectIfAuthenticated = ({ component: Component }) => {
-  const { user, isLoading } = useAuth();
+    checkAuth();
+  }, []);
 
-  if (isLoading) return <p>Loading...</p>;
-  return user ? <Navigate to="/home" /> : <Component />;
-};
+  if (loading) {
+    return <div>Loading...</div>;  // Загрузочный экран
+  }
 
-const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<RedirectIfAuthenticated component={LoginPage} />} />
-          <Route path="/signup" element={<RedirectIfAuthenticated component={SignupPage} />} />
-          <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/" element={<MainPage />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage setUser={setUser} />} />
+        <Route path="/signup" element={user ? <Navigate to="/home" /> : <SignupPage />} />
+        <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/login" />} />
+        <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
-
-

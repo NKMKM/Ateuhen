@@ -1,60 +1,48 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import '../App.css';
-import { useAuth } from './context/AuthContext';
+import React, { useState } from 'react';
+import axios from 'axios';
+import "../App.css"
+function LoginPage({ setUser }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-const LoginForm = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false); 
-    const navigate = useNavigate();
-    const { login } = useAuth();
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:5000/auth/login', { email, password }, { withCredentials: true });
+      setUser(response.data.user); 
+    } catch (err) {
+      setError('Invalid email or password');
+    }
+  };
 
-    const handleLogin = async () => {
-        setLoading(true); 
-        try {
-            const res = await fetch("http://localhost:5000/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                console.log('Login successful:', data); 
-                localStorage.setItem("token", data.token); 
-                login(data); 
-                navigate("/home"); 
-            } else {
-                alert(data.error); 
-            }
-        } catch (error) {
-            console.log(error.req)
-            alert("Ошибка при подключении к серверу");
-        } finally {
-            setLoading(false); 
-        }
-    };
-
-    return (
+  return (
+    <div>
+      <h1>Login</h1>
+      {error && <p>{error}</p>}
+      <form onSubmit={handleLogin}>
         <div>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleLogin} disabled={loading}>
-                {loading ? "Loading..." : "Login"}
-            </button>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
-    );
-};
+        <div>
+          <label>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+}
 
-export default LoginForm;
+export default LoginPage;
