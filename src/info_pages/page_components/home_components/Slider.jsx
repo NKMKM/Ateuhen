@@ -44,7 +44,7 @@ export default function App() {
             <Swiper
                 loop={true}
                 spaceBetween={30}
-                centeredSlides={true}
+                centeredSlides={false}
                 autoplay={{
                 delay: 2500,
                 disableOnInteraction: false,

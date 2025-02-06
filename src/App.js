@@ -5,6 +5,7 @@ import RegisterForm from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import InfoPage from './info_pages/Home';
+import Premium from './info_pages/Premium'
 
 function App() {
   const [user, setUser] = useState(null);
@@ -29,6 +30,7 @@ function App() {
         <Route path="/register" element={user ? <Navigate to="/home" /> : <RegisterForm setUser={setUser} />} />
         <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage setUser={setUser} />} />
         <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/" />} />
+        <Route path='/premium' element={<Premium/>}> </Route>
       </Routes>
     </Router>
   );
