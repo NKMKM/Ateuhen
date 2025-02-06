@@ -20,7 +20,7 @@ const HomeInfoThree = () => {
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
                 <h1 className='text-4xl font-bold'>Unlock Exclusive Benefits with Premium Features</h1>
-                <p className=''>Upgrade to <Link to='/premium' className='text-[#027a48] animated-underline ml-1 mr-1' >Ne Hueta Premium</Link> for unparalleled access.</p>
+                <p className=''>Upgrade to <Link to='/premium' className='text-[#3ECF8E] animated-underline ml-1 mr-1' >Ne Hueta Premium</Link> for unparalleled access.</p>
                 
 
             </div>
@@ -29,7 +29,7 @@ const HomeInfoThree = () => {
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
                 <h1 className='text-4xl font-bold'>Experience Priority Matchmaking and Exclusive Tournaments</h1>
-                <p className='text-[#027a48] mb-0'>Enjoy benefits that elevate your gaming experience.</p>
+                <p className='text-[#3ECF8E] mb-0'>Enjoy benefits that elevate your gaming experience.</p>
                 
 
             </div>
@@ -38,7 +38,7 @@ const HomeInfoThree = () => {
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
                 <h1 className='text-4xl font-bold'>Join Our Community and Level Up Together</h1>
-                <p className='text-[#027a48] mb-0'>Connect, compete, and grow with fellow gamers.</p>
+                <p className='text-[#3ECF8E] mb-0'>Connect, compete, and grow with fellow gamers.</p>
                 
 
             </div>
