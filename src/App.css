@@ -96,10 +96,10 @@ body{
 .swiper-pagination {
     display: flex !important; /* Используем flexbox для выравнивания */
     justify-content: flex-start !important; /* Выравнивание кружков по левому краю */
-    gap: 4px !important; /* Отступы между кружками */
+    gap: 8px !important; /* Отступы между кружками */
     position: absolute !important; /* Позиционирование в левом нижнем углу */
-    left: 405px !important; /* Расстояние от левого края */
-    bottom: 100px !important; /* Расстояние от нижнего края */
+    left: 10px !important; /* Расстояние от левого края */
+    bottom: 10px !important; /* Расстояние от нижнего края *
     z-index: 10 !important; /* Обеспечиваем, чтобы пагинация была сверху */
     align-items: center !important; /* Выравнивание кружков по вертикали по центру */
 }
