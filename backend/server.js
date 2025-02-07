@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -21,7 +19,6 @@ app.use(cors({
   credentials: true,  
 }));
 
-// Для работы с прокси (например, Heroku)
 app.set('trust proxy', true);  
 
 const pool = new Pool({
@@ -34,14 +31,12 @@ const pool = new Pool({
 
 const SECRET = process.env.JWT_SECRET || 'defaultsecret';
 
-// Регистрация пользователя
 app.post('/auth/register', async (req, res) => {
   const { first_name, second_name, email, nickname, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const created_at = new Date();
 
   try {
-    // Создаем пользователя в базе
     const userResult = await pool.query(
       "INSERT INTO users (first_name, second_name, email, nickname, password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
       [first_name, second_name, email, nickname, hashedPassword, created_at]
@@ -49,22 +44,18 @@ app.post('/auth/register', async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // Генерируем токен
     const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: '1h' });
 
-    // Логируем устройство пользователя
     const platform = req.useragent?.platform || 'Unknown';
     const browser = req.useragent?.browser || 'Unknown';
     const ipAddress = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
 
-    // Записываем вход в login_logs
     await pool.query(
       `INSERT INTO login_logs (user_id, device, browser, login_time, token, ip_address) 
        VALUES ($1, $2, $3, NOW(), $4, $5)`,
       [user.id, platform, browser, token, ipAddress]
     );
 
-    // Устанавливаем куки с токеном
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -79,18 +70,15 @@ app.post('/auth/register', async (req, res) => {
 });
 
 
-// Логин пользователя
 app.post('/auth/login', asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Валидация входных данных
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
   const ipAddress = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
 
-  // Шаг 1: Ищем пользователя по email
   const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   if (result.rows.length === 0) {
     return res.status(400).json({ error: "User not found" });
@@ -98,38 +86,31 @@ app.post('/auth/login', asyncHandler(async (req, res) => {
 
   const user = result.rows[0];
 
-  // Шаг 2: Проверяем правильность пароля
   const isValid = await bcrypt.compare(password, user.password);
   if (!isValid) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  // Шаг 3: Генерация JWT токена
   const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: '1h' });
 
-  // Логируем информацию о входе
   const platform = req.useragent ? req.useragent.platform : 'Unknown platform';
   const browser = req.useragent ? req.useragent.browser : 'Unknown browser';
 
-  // Шаг 4: Логируем информацию о входе в login_logs
   await pool.query(
     `INSERT INTO login_logs (user_id, device, browser, login_time, token, ip_address) 
      VALUES ($1, $2, $3, NOW(), $4, $5)`,
     [user.id, platform, browser, token, ipAddress]
   );
 
-  // Шаг 5: Отправляем токен в cookie
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',  // только через HTTPS в продакшн
+    secure: process.env.NODE_ENV === 'production',  
     sameSite: 'Strict',  // защита от CSRF атак
   });
 
-  // Шаг 6: Возвращаем данные пользователя
   res.json({ message: "Login successful", user });
 }));
 
-// Проверка токена (это защищённый маршрут)
 app.get('/auth/check', asyncHandler(async (req, res) => {
   const token = req.cookies.token;
 
@@ -145,7 +126,6 @@ app.get('/auth/check', asyncHandler(async (req, res) => {
   }
 }));
 
-// Логаут пользователя
 app.post('/auth/logout', asyncHandler(async (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
@@ -156,7 +136,6 @@ app.post('/auth/logout', asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
 }));
 
-// Защищенный маршрут /home
 app.get('/home', asyncHandler(async (req, res) => {
   const token = req.cookies.token;
 
@@ -172,13 +151,11 @@ app.get('/home', asyncHandler(async (req, res) => {
   }
 }));
 
-// Обработчик ошибок
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
