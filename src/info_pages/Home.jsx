@@ -6,7 +6,6 @@ import HomeInfoThree from '../info_pages/page_components/home_components/HomeInf
 import Blog from './page_components/home_components/Blog';
 import Nav from './page_components/Nav';
 import Footer from './page_components/Footer';
-// Ateuhen-main\src\info_pages\page_components\home_components\Blog.jsx
 const MainPage = () => {
   return (
     <>
