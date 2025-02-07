@@ -8,11 +8,11 @@ const Footer = () => {
             <div className='space-y-10'>
                 <h1 className='text-4xl font-bold  cursor-pointer text-glow-hover'>Logo</h1>
                 <ul className='flex flex-row space-x-10 '>
-                    <li className='cursor-pointer animated-underline-white'><Link to='/about_us'>About us</Link></li>
-                    <li className='cursor-pointer animated-underline-white'>Contact us</li>
-                    <li className='cursor-pointer animated-underline-white'>Support Center</li>
-                    <li className='cursor-pointer animated-underline-white'>Join Now</li>
-                    <li className='cursor-pointer animated-underline-white'>Game Library</li>
+                    <li className='cursor-pointer animated-underline-violet'><Link to='/about_us'>About us</Link></li>
+                    <li className='cursor-pointer animated-underline-violet'>Contact us</li>
+                    <li className='cursor-pointer animated-underline-violet'>Support Center</li>
+                    <li className='cursor-pointer animated-underline-violet'>Join Now</li>
+                    <li className='cursor-pointer animated-underline-violet'>Game Library</li>
                 </ul>
             </div>
             <div className='flex flex-col justify-between'>

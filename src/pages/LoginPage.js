@@ -25,10 +25,13 @@ function LoginPage({ setUser }) {
         <div className="bg-[#8A3CFA] opacity-25 w-[500px] h-[400px] rounded-tr-full fixed bottom-0"></div>
         {/* див с инфой */}
         <div className="backdrop-blur-[100px] w-full h-screen fixed ">
-          <Link to="/" className="w-[100px] h-[50px] border-2 border-gray-400 rounded-lg flex items-center justify-center text-center fixed top-5 left-5 scale-hover"> <WestIcon fontSize="small"/> <p className="block w-[5px]"></p>Back</Link>
+          <Link to="/" className="w-[100px] h-[50px] border-2 border-gray-400 rounded-lg flex items-center justify-center text-center fixed top-5 left-5 button-violet-hover"> <WestIcon fontSize="small"/> <p className="block w-[5px]"></p>Back</Link>
           {error && <p>{error}</p>}
           <form onSubmit={handleLogin} className="w-[700px] h-[700px] mx-auto mt-32 p-10 flex items-center flex-col justify-around">
-            <h1 className="text-7xl text-center font-bold ">Login</h1>  
+            <div className='flex flex-col items-center space-y-5'>
+              <h1 className="text-7xl text-center font-bold ">Login</h1>  
+              <p>Welcome back!</p>
+            </div>
             <div className=" flex flex-col space-y-4 w-[90%] p-4">
               <input
                 type="email"

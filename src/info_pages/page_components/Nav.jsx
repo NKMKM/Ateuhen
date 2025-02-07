@@ -46,10 +46,10 @@ const Nav = () => {
         </ul>
         <div className='flex space-x-10 mr-10 '>
         <Link to="/login">
-          <button className='border-2 rounded-[10px] w-[80px] h-[40px]  hover:bg-gray-300 hover:text-black  hover:scale-105 transition duration-300 ' >Log in</button>
+          <button className='border-2 rounded-[10px] w-[80px] h-[40px]  button-violet-hover ' >Log in</button>
         </Link>
         <Link to="/register">
-          <button className='border-2 rounded-[10px] w-[100px] h-[40px]  hover:bg-gray-300 hover:text-black hover:scale-105 transition duration-300' >Register</button>
+          <button className='border-2 rounded-[10px] w-[100px] h-[40px]  button-violet-hover' >Register</button>
         </Link>
         </div>
       </nav>

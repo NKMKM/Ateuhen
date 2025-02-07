@@ -11,7 +11,7 @@ const HomeInfoThree = () => {
         <p className='mb-5 text-glow-hover font-bold'>Features</p>
 
         <div className='flex flex-row justify-between mb-24 items-center'>
-            <h1 className='w-1/2 text-7xl font-bold'>Explore Our Unique Community and Premium Benefits</h1>
+            <h1 className='w-1/2 text-7xl font-bold text-[#8A3CFA]'>Explore Our Unique Community and Premium Benefits</h1>
             <p className='w-1/2 text-3xl font-thin'>At NeHueta, we believe in the power of community. Our platform fosters connections among gamers, allowing you to form teams and make new friends. Join a vibrant network where collaboration and competition thrive.</p>
         </div>
 
@@ -19,7 +19,7 @@ const HomeInfoThree = () => {
         {/* блок с инфо */}
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
-                <h1 className='text-4xl font-bold'>Unlock Exclusive Benefits with Premium Features</h1>
+                <h1 className='text-4xl font-bold text-glow-hover'>Unlock Exclusive Benefits with Premium Features</h1>
                 <p className=''>Upgrade to <Link to='/premium' className='text-[#3ECF8E] animated-underline ml-1 mr-1' >Ne Hueta Premium</Link> for unparalleled access.</p>
                 
 
@@ -28,7 +28,7 @@ const HomeInfoThree = () => {
             {/* блок с инфо 2*/}
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
-                <h1 className='text-4xl font-bold'>Experience Priority Matchmaking and Exclusive Tournaments</h1>
+                <h1 className='text-4xl font-bold text-glow-hover'>Experience Priority Matchmaking and Exclusive Tournaments</h1>
                 <p className='text-[#3ECF8E] mb-0'>Enjoy benefits that elevate your gaming experience.</p>
                 
 
@@ -37,7 +37,7 @@ const HomeInfoThree = () => {
             {/* блок с инфо 2*/}
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
-                <h1 className='text-4xl font-bold'>Join Our Community and Level Up Together</h1>
+                <h1 className='text-4xl font-bold text-glow-hover'>Join Our Community and Level Up Together</h1>
                 <p className='text-[#3ECF8E] mb-0'>Connect, compete, and grow with fellow gamers.</p>
                 
 
@@ -47,12 +47,12 @@ const HomeInfoThree = () => {
 
         <div>
             <div className="flex flex-row justify-between w-[250px] mb-20">
-                <button className="w-[130px] h-[50px] border-2 border-white rounded-lg scale-hover">
+                <button className="w-[130px] h-[50px] border-2 border-white rounded-lg button-violet-hover">
                     Learn More
                 </button>
                 <div className="flex flex-row">
                     <button className="flex items-center  rounded-lg px-4 py-2 group scale-hover">
-                    <Link to="/register"><span>Sign in</span></Link>
+                    <Link to="/login"><span>Sign in</span></Link>
                     <MdKeyboardArrowRight className="ml-2 transform transition-transform duration-300 group-hover:translate-x-2" />
                     </button>
                 </div>

@@ -67,7 +67,7 @@ export default function App() {
                         />
                     </div>
                     
-                    <div className="absolute bottom-30 left-0 w-full  text-white p-20">
+                    <div className="absolute bottom-30 left-0 w-full  text-white py-24">
                         <h3 className="text-2xl font-bold">{TextHeaderArray[index]}</h3>
                         <p className="text-lg">{TextParagraphArray[index]}</p>
                     </div>

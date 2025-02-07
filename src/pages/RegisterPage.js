@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import WestIcon from '@mui/icons-material/West';
+
 
 const RegisterForm = ({ setUser }) => {
   const navigate = useNavigate();
@@ -59,70 +62,95 @@ const RegisterForm = ({ setUser }) => {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        {step === 1 && (
-          <>
-            <input
-              type="text"
-              placeholder="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Second Name"
-              value={secondName}
-              onChange={(e) => setSecondName(e.target.value)}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <button type="button" onClick={handleNextStep}>Next</button>
-          </>
-        )}
+    <>
+      {/* размытый кружок зеленый сверху слева */}
+      <div className="bg-[#3ECF8E] fixed top-0 left-0 opacity-25 w-[500px] h-[400px] rounded-br-full "></div>
+      {/* контейнер с инфо */}
+      <div className="backdrop-blur-[100px] w-full h-screen fixed  z-10 ">
+        <Link to="/" className="w-[100px] h-[50px] border-2 border-gray-400 rounded-lg flex items-center justify-center text-center fixed top-5 left-5 button-violet-hover bg-black"> <WestIcon fontSize="small"/> <p className="block w-[5px]"></p>Back</Link>
 
-        {step === 2 && (
-          <>
-            <input
-              type="text"
-              placeholder="Nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              required
-            />
-            <button type="button" onClick={handleNextStep}>Next</button>
-          </>
-        )}
+        <form onSubmit={handleRegister} className="w-[700px] h-[700px] mx-auto mt-32 p-10 flex items-center flex-col justify-around">
+          <div className="flex flex-col items-center space-y-5">
+            <h1 className="text-7xl text-center font-bold ">Registration</h1>
+            <p>Welcome to our community!</p>
+          </div>
+          {step === 1 && (
+            <>
+              <input
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
 
-        {step === 3 && (
-          <>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            <button type="submit">Register</button>
-          </>
-        )}
-      </form>
-    </div>
+                />
+              <input
+                type="text"
+                placeholder="Second Name"
+                value={secondName}
+                onChange={(e) => setSecondName(e.target.value)}
+                required
+                className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+
+                />
+              <div className="flex items-center flex-col  space-y-3 w-[90%] p-4">
+                <button type="button" onClick={handleNextStep} className="w-full bg-[#3ECF8E] h-[70px] font-bold text-3xl rounded-lg hover:bg-[#66ffba] hover:scale-105 transition duration-300  ">Next</button>
+                <Link to="/login" className="text-glow-hover underline">Already have an account?</Link>
+
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <input
+                type="text"
+                placeholder="Nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                required
+                />
+              <button type="button" onClick={handleNextStep}>Next</button>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button className="bg-amber-200" type="submit"> Register</button>
+            </>
+          )}
+        </form>
+      </div>
+
+
+      {/* размытый кружок зеленый снизу справа */}
+      <div className="bg-[#3ECF8E] fixed bottom-0 right-0 opacity-25 w-[500px] h-[400px] rounded-tl-full " ></div>
+    </>
+    
   );
 };
 

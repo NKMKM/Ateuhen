@@ -176,6 +176,40 @@ body{
     left: 0; /* Линия смещается влево, чтобы покрыть весь элемент */
 }
 
+.animated-underline-violet {
+    position: relative;
+    display: inline-block;
+    font-size: 1.2em;
+    font-weight: normal;
+    text-decoration: none;
+    color: white; /* Начальный цвет текста */
+    cursor: pointer;
+    padding-bottom: 2px; /* Отступ снизу для линии */
+    transition: color 0.4s ease; /* Плавное изменение цвета текста */
+}
+
+.animated-underline-violet::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* Начало линии из центра */
+    width: 0; /* Исходная ширина линии */
+    height: 2px; /* Толщина линии */
+    background-color: #AB70FD; /* Цвет линии */
+    transition: width 0.4s ease, left 0.4s ease; /* Плавный переход для линии */
+}
+
+.animated-underline-violet:hover {
+    color: #AB70FD; /* Цвет текста при наведении */
+}
+
+.animated-underline-violet:hover::after {
+    width: 100%; /* Линия растягивается до полной ширины */
+    left: 0; /* Линия смещается влево, чтобы покрыть весь элемент */
+}
+
+
+
 .lift-on-hover {
     transition: transform 0.3s ease-out;
 }
@@ -206,5 +240,15 @@ body{
     }
 }
 
-
+.button-violet-hover {
+    transition: all 0.3s ease-in-out;
+}
   
+.button-violet-hover:hover {
+    color: black;
+    background-color: #AB70FD;
+    border: 2px solid black;
+    transform: scale(1.05);
+}
+  
+

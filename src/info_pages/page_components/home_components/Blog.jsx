@@ -8,7 +8,7 @@ const Blog = () => {
         {/* блок с текстом */}
         <div className='flex flex-col justify-between items-center w-[770px] mx-auto h-[150px]'>
             <p className='font-bold text-s cursor-pointer text-glow-hover'>Blog</p>
-            <h1 className='font-bold text-5xl'>Latest Gaming Insights</h1>
+            <h1 className='font-bold text-5xl text-[#8A3CFA]'>Latest Gaming Insights</h1>
             <p>Stay updated with the latest in gaming.</p>
         </div>
 
@@ -102,7 +102,7 @@ const Blog = () => {
         </div>
         {/* кнопка */}
         <div className='mx-auto w-[110px] my-10'>
-            <button className='h-[50px] w-[105px] border-2  scale-hover rounded-md'>View All</button>
+            <button className='h-[50px] w-[105px] border-2  button-violet-hover rounded-md'>View All</button>
         </div>
 
 

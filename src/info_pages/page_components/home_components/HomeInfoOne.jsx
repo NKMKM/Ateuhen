@@ -35,7 +35,7 @@ const HomeInfoOne = () => {
     >        <p className='font-bold text-s cursor-pointer text-glow-hover'>Join</p>
     {/* контейнер с текстом */}
         <div className='flex flex-col items-center m-10 w-[770px]'>
-            <h1 className='text-5xl font-bold text-center m-5'>Experience Competitive Gaming Like Never Before</h1>
+            <h1 className='text-5xl font-bold text-center m-5 text-[#8A3CFA]'>Experience Competitive Gaming Like Never Before</h1>
             <p className='text-center'>At NeHueta, we provide a unique ELO-based ranking system that matches players of similar skill levels. This ensures fair competition and a thrilling gaming experience for everyone.</p>
         </div>
     {/* //контейнер с карточками  */}
@@ -65,7 +65,7 @@ const HomeInfoOne = () => {
         </div>
     {/* //контейнер с кнопками */}
         <div className="flex flex-row justify-between w-[250px] mb-20">
-            <button className="w-[130px] h-[50px] border-2 border-white rounded-lg scale-hover">
+            <button className="w-[130px] h-[50px] border-2 border-white rounded-lg button-violet-hover">
                 Learn More
             </button>
             <div className="flex flex-row">
