@@ -69,42 +69,44 @@ const RegisterForm = ({ setUser }) => {
       <div className="backdrop-blur-[100px] w-full h-screen fixed  z-10 ">
         <Link to="/" className="w-[100px] h-[50px] border-2 border-gray-400 rounded-lg flex items-center justify-center text-center fixed top-5 left-5 button-violet-hover bg-black"> <WestIcon fontSize="small"/> <p className="block w-[5px]"></p>Back</Link>
 
-        <form onSubmit={handleRegister} className="w-[700px] h-[700px] mx-auto mt-32 p-10 flex items-center flex-col justify-around">
-          <div className="flex flex-col items-center space-y-5">
+        <form onSubmit={handleRegister} className="w-[700px] h-[700px] mx-auto mt-32 p-10 flex items-center flex-col justify-around ">
+          <div className="flex flex-col items-center space-y-5 mb-2">
             <h1 className="text-7xl text-center font-bold ">Registration</h1>
             <p>Welcome to our community!</p>
           </div>
           {step === 1 && (
             <>
-              <input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-                className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+              <div className=" flex flex-col space-y-4 w-[70%] p-4">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+
+                  />
+                <input
+                  type="text"
+                  placeholder="Second Name"
+                  value={secondName}
+                  onChange={(e) => setSecondName(e.target.value)}
+                  required
+                  className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
 
                 />
-              <input
-                type="text"
-                placeholder="Second Name"
-                value={secondName}
-                onChange={(e) => setSecondName(e.target.value)}
-                required
-                className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
 
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
-
-                />
-              <div className="flex items-center flex-col  space-y-3 w-[90%] p-4">
-                <button type="button" onClick={handleNextStep} className="w-full bg-[#3ECF8E] h-[70px] font-bold text-3xl rounded-lg hover:bg-[#66ffba] hover:scale-105 transition duration-300  ">Next</button>
+                  />
+              </div>
+              <div className="flex items-center flex-col mb-4 space-y-3  p-4">
+                <button type="button" onClick={handleNextStep} className="w-[110%] bg-[#3ECF8E] h-[70px] font-bold text-3xl rounded-lg hover:bg-[#66ffba] hover:scale-105 transition duration-300  ">Next</button>
                 <Link to="/login" className="text-glow-hover underline">Already have an account?</Link>
 
               </div>
@@ -119,28 +121,34 @@ const RegisterForm = ({ setUser }) => {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 required
+                className="w-[67%] mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+
                 />
-              <button type="button" onClick={handleNextStep}>Next</button>
+              <button type="button" onClick={handleNextStep} className="w-[198px] bg-[#3ECF8E] h-[70px] font-bold text-3xl rounded-lg hover:bg-[#66ffba] hover:scale-105 transition duration-300 mb-4 " >Next</button>
             </>
           )}
 
           {step === 3 && (
             <>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              <button className="bg-amber-200" type="submit"> Register</button>
+              <div className=" flex flex-col space-y-4 w-[70%] p-4">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full mx-auto h-[60px] border-2 rounded-lg bg-black p-2"
+                />
+              </div>
+              <button type="submit" className="w-[198px] bg-[#3ECF8E] h-[70px] font-bold text-3xl rounded-lg hover:bg-[#66ffba] hover:scale-105 transition duration-300  mb-4"> Register</button>
             </>
           )}
         </form>

@@ -103,19 +103,19 @@ body{
     z-index: 10 !important; /* Обеспечиваем, чтобы пагинация была сверху */
     align-items: center !important; /* Выравнивание кружков по вертикали по центру */
 }
-
 /* Стиль для всех кружков */
 .swiper-pagination-bullet {
-    background-color: white !important; /* Белый цвет для всех кружков */
+    background-color: #AB70FD !important; /* Белый цвет для всех кружков */
     width: 10px !important; /* Размер обычного кружка */
     height: 10px !important; /* Размер обычного кружка */
     border-radius: 50% !important; /* Сделаем их круглыми */
     margin: 0 !important; /* Убираем дополнительные отступы */
+    
 }
 
 /* Стиль для активного кружка */
 .swiper-pagination-bullet-active {
-    background-color: white !important; /* Белый цвет для активного кружка */
+    background-color: #8A3CFA !important; /* Белый цвет для активного кружка */
     width: 15px !important; /* Увеличенный размер для активного кружка */
     height: 15px !important; /* Увеличенный размер для активного кружка */
     opacity: 0.7 !important; /* Прозрачность активного кружка */

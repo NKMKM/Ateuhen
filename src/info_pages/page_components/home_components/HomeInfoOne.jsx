@@ -70,7 +70,7 @@ const HomeInfoOne = () => {
             </button>
             <div className="flex flex-row">
                 <button className="flex items-center  rounded-lg px-4 py-2 group scale-hover">
-                <Link to="/register"><span>Sign in</span></Link>
+                <Link to="/login"><span>Sign in</span></Link>
                 <MdKeyboardArrowRight className="ml-2 transform transition-transform duration-300 group-hover:translate-x-2" />
                 </button>
             </div>
