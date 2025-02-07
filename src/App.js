@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import InfoPage from './info_pages/Home';
 import Premium from './info_pages/Premium'
+import NotFound from './info_pages/NotFound';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,6 +32,7 @@ function App() {
         <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage setUser={setUser} />} />
         <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/" />} />
         <Route path='/premium' element={<Premium/>}> </Route>
+        <Route path="/*" element={<NotFound/>}/>
       </Routes>
     </Router>
   );
