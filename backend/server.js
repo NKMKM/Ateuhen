@@ -151,6 +151,52 @@ app.get('/home', asyncHandler(async (req, res) => {
   }
 }));
 
+app.get('/auth/sessions', async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    const sessions = await pool.query(
+      "SELECT id, device, browser, login_time, ip_address FROM login_logs WHERE user_id = $1",
+      [decoded.id]
+    );
+    res.json(sessions.rows);
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
+
+app.delete('/auth/sessions/:sessionId', async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    const { sessionId } = req.params;
+
+    const session = await pool.query(
+      "SELECT * FROM login_logs WHERE id = $1 AND user_id = $2",
+      [sessionId, decoded.id]
+    );
+
+    if (session.rows.length === 0) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    await pool.query("DELETE FROM login_logs WHERE id = $1", [sessionId]);
+
+    if (session.rows[0].token === token) {
+      res.clearCookie('token');
+      return res.json({ message: "Session deleted, logging out", logout: true });
+    }
+
+    res.json({ message: "Session deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
