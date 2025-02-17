@@ -8,6 +8,7 @@ import InfoPage from './info_pages/Home';
 import Premium from './info_pages/Premium';
 import NotFound from './info_pages/NotFound';
 import SessionsPage from './test_pages/SessionPage';
+import TestCard from './pages/TestCard';
 
 function App() {
   const [user, setUser] = useState(undefined); 
@@ -39,6 +40,7 @@ function App() {
         <Route path="/sessions" element={user ? <SessionsPage setUser={setUser} /> : <Navigate to="/login" />} />
         <Route path="/premium" element={<Premium />} />
         <Route path="/*" element={<NotFound />} />
+        <Route path="/testcard" element={<TestCard />} />
       </Routes>
     </Router>
   );
