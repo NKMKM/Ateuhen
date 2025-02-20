@@ -9,6 +9,7 @@ import Premium from './info_pages/Premium';
 import NotFound from './info_pages/NotFound';
 import SessionsPage from './test_pages/SessionPage';
 import TestCard from './pages/TestCard';
+import ChatPage from './pages/ChatPage';
 
 function App() {
   const [user, setUser] = useState(undefined); 
@@ -41,6 +42,7 @@ function App() {
         <Route path="/premium" element={<Premium />} />
         <Route path="/*" element={<NotFound />} />
         <Route path="/testcard" element={<TestCard />} />
+        <Route path="/chat" element={user ? <ChatPage user={user} /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );
