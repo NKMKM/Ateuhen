@@ -33,7 +33,7 @@ const Footer = () => {
                 <li className='underline cursor-pointer'><a>Terms of Service</a></li>
                 <li className='underline cursor-pointer'><a>Cookies Settings</a></li>
             </ul>
-            <p>&copy; 2025 NeHueta. All rights reserved.</p>
+            <p>&copy; 2025 Ateuhen. All rights reserved.</p>
         </div>
     </footer>
   )

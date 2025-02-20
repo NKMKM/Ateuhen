@@ -36,7 +36,7 @@ const HomeInfoOne = () => {
     {/* контейнер с текстом */}
         <div className='flex flex-col items-center m-10 w-[770px]'>
             <h1 className='text-5xl font-bold text-center m-5 text-[#8A3CFA]'>Experience Competitive Gaming Like Never Before</h1>
-            <p className='text-center'>At NeHueta, we provide a unique ELO-based ranking system that matches players of similar skill levels. This ensures fair competition and a thrilling gaming experience for everyone.</p>
+            <p className='text-center'>At Ateuhen, we provide a unique ELO-based ranking system that matches players of similar skill levels. This ensures fair competition and a thrilling gaming experience for everyone.</p>
         </div>
     {/* //контейнер с карточками  */}
         <div className='flex flex-row justify-around mt-32 mb-32'>

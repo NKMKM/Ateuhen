@@ -12,7 +12,7 @@ const HomeInfoThree = () => {
 
         <div className='flex flex-row justify-between mb-24 items-center'>
             <h1 className='w-1/2 text-7xl font-bold text-[#8A3CFA]'>Explore Our Unique Community and Premium Benefits</h1>
-            <p className='w-1/2 text-3xl font-thin'>At NeHueta, we believe in the power of community. Our platform fosters connections among gamers, allowing you to form teams and make new friends. Join a vibrant network where collaboration and competition thrive.</p>
+            <p className='w-1/2 text-3xl font-thin'>At Ateuhen, we believe in the power of community. Our platform fosters connections among gamers, allowing you to form teams and make new friends. Join a vibrant network where collaboration and competition thrive.</p>
         </div>
 
         <div className='flex flex-row justify-between mb-20'>
@@ -20,7 +20,7 @@ const HomeInfoThree = () => {
             <div className='flex flex-col w-[405px] space-y-7 scale-hover'>
                 <div className='w-[50px] h-[50px]'><LuBox className='w-full h-full'/></div>
                 <h1 className='text-4xl font-bold text-glow-hover'>Unlock Exclusive Benefits with Premium Features</h1>
-                <p className=''>Upgrade to <Link to='/premium' className='text-[#3ECF8E] animated-underline ml-1 mr-1' >Ne Hueta Premium</Link> for unparalleled access.</p>
+                <p className=''>Upgrade to <Link to='/premium' className='text-[#3ECF8E] animated-underline ml-1 mr-1' >Ateuhen Premium</Link> for unparalleled access.</p>
                 
 
             </div>
