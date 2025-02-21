@@ -19,11 +19,13 @@ function App() {
     const checkAuth = async () => {
       try {
         const response = await axios.get('http://localhost:5000/auth/check', { withCredentials: true });
-        setUser(response.data.user);
+        console.log("✅ User loaded:", response.data.user);
+        setUser(response.data.user || null);
       } catch (error) {
+        console.error("❌ Error loading user:", error);
         setUser(null);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
     checkAuth();

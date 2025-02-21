@@ -1,153 +1,289 @@
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import io from "socket.io-client";
 
 const socket = io("http://localhost:5000", { withCredentials: true });
 
-export default function ChatApp() {
-  const [userCode, setUserCode] = useState(""); // Код текущего пользователя
-  const [nickname, setNickname] = useState(""); // Никнейм друга
+const ChatPage = () => {
   const [friends, setFriends] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [currentFriend, setCurrentFriend] = useState(null);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
+  const [messageInput, setMessageInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
+  // Загружаем данные текущего пользователя
+  // Загружаем данные текущего пользователя
+useEffect(() => {
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/auth/check", { withCredentials: true });
+      if (res.data.user) {
+        setCurrentUser(res.data.user);
+        localStorage.setItem("currentUser", JSON.stringify(res.data.user)); // Сохраняем данные
+      } else {
+        console.error("Пользователь не авторизован");
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      console.error("Ошибка загрузки данных пользователя:", error);
+      window.location.href = "/login";
+    }
+  };
+
+  // Проверяем, есть ли данные в localStorage
+  const savedUser = localStorage.getItem("currentUser");
+  if (savedUser) {
+    setCurrentUser(JSON.parse(savedUser));
+  } else {
+    fetchCurrentUser();
+  }
+}, []);
+
+  // Загружаем друзей и заявки в друзья
   useEffect(() => {
-    fetchUserName();
-    fetchFriends();
-    fetchRequests();
+    const fetchData = async () => {
+      try {
+        const friendsRes = await axios.get("http://localhost:5000/friends/list", { withCredentials: true });
+        setFriends(friendsRes.data);
+  
+        const requestsRes = await axios.get("http://localhost:5000/friends/requests", { withCredentials: true });
+        setFriendRequests(requestsRes.data);
+      } catch (error) {
+        console.error("Ошибка загрузки друзей/заявок:", error);
+      }
+    };
+  
+    if (currentUser) {
+      fetchData();
+    }
+  }, [currentUser]);
 
-    socket.on("receiveMessage", (data) => {
-      if (data.sender === currentFriend) {
-        setMessages((prev) => [...prev, data]);
+  // Поиск друзей по никнейму
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+
+    const fetchSearchResults = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/friends/search?nickname=${searchTerm}`, { withCredentials: true });
+        setSearchResults(res.data);
+      } catch (error) {
+        console.error("Ошибка поиска друзей:", error);
+      }
+    };
+
+    fetchSearchResults();
+  }, [searchTerm]);
+
+  // Загружаем сообщения при выборе чата
+  useEffect(() => {
+    if (selectedChat) {
+      axios.get(`http://localhost:5000/chat/messages?receiverId=${selectedChat.id}`, { withCredentials: true })
+        .then((res) => setMessages(res.data))
+        .catch((err) => {
+          console.error("Ошибка загрузки сообщений:", err);
+          alert("Не удалось загрузить сообщения");
+        });
+    }
+  }, [selectedChat]);
+  // Обработка новых сообщений из WebSocket
+  useEffect(() => {
+    socket.on("receiveMessage", (message) => {
+      const isMessageExists = messages.some((msg) => msg.id === message.id);
+      if (!isMessageExists) {
+        setMessages((prev) => [...prev, message]);
       }
     });
 
-    socket.on("friendRequestReceived", (data) => {
-      setRequests((prev) => [...prev, data]);
-    });
+    return () => socket.off("receiveMessage");
+  }, [messages, selectedChat]);
 
-    fetchMessages();
+  // Отправка сообщения
+  const sendMessage = () => {
+    if (messageInput.trim() && selectedChat && currentUser) {
+      socket.emit("sendMessage", {
+        senderId: currentUser.id,
+        receiverId: selectedChat.id,
+        message: messageInput,
+      });
 
-    return () => {
-      socket.off("receiveMessage");
-      socket.off("friendRequestReceived");
-    };
-  }, [currentFriend]);
-
-  // Получение кода текущего пользователя
-  const fetchUserName = async () => {
-    const res = await fetch("http://localhost:5000/user/nickname", { credentials: "include" });
-    const data = await res.json();
-    setUserCode(data.code);
+      setMessageInput("");
+    }
   };
 
-  const fetchFriends = async () => {
-    const res = await fetch("http://localhost:5000/friends/list", { credentials: "include" });
-    const data = await res.json();
-    setFriends(data);
+  // Отправка запроса в друзья
+  const sendFriendRequest = async (receiverId) => {
+    if (!currentUser || !currentUser.id || !receiverId) {
+      alert("Недостаточно данных для отправки запроса");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "http://localhost:5000/friends/request",
+        { senderId: currentUser.id, receiverId },
+        { withCredentials: true }
+      );
+      alert("Запрос в друзья отправлен");
+    } catch (error) {
+      console.error("Ошибка отправки запроса в друзья:", error);
+      alert("Не удалось отправить запрос в друзья");
+    }
   };
 
-  const fetchRequests = async () => {
-    const res = await fetch("http://localhost:5000/friends/requests", { credentials: "include" });
-    const data = await res.json();
-    setRequests(data);
+  // Принять заявку в друзья
+  const handleAcceptRequest = async (senderId) => {
+    if (!currentUser || !currentUser.id || !senderId) {
+      alert("Недостаточно данных для обработки заявки");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "http://localhost:5000/friends/accept",
+        { senderId },
+        { withCredentials: true }
+      );
+      alert("Заявка в друзья принята");
+      // Обновляем список заявок
+      const requestsRes = await axios.get("http://localhost:5000/friends/requests", { withCredentials: true });
+      setFriendRequests(requestsRes.data);
+    } catch (error) {
+      console.error("Ошибка при принятии заявки:", error);
+      alert("Не удалось принять заявку");
+    }
   };
 
-  const fetchMessages = async () => {
-    if (!currentFriend) return;
-    const res = await fetch(`http://localhost:5000/messages/${currentFriend}`, { credentials: "include" });
-    const data = await res.json();
-    setMessages(data);
-  };
+  // Отклонить заявку в друзья
+  const handleRejectRequest = async (senderId) => {
+    if (!currentUser || !currentUser.id || !senderId) {
+      alert("Недостаточно данных для обработки заявки");
+      return;
+    }
 
-  // Отправка запроса в друзья по никнейму
-  const sendFriendRequest = async () => {
-    await fetch("http://localhost:5000/friends/add", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nickname }),
-    });
-    setNickname("");
-  };
-
-  const acceptRequest = async (sender) => {
-    await fetch("http://localhost:5000/friends/accept", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sender }),
-    });
-    fetchFriends();
-    fetchRequests();
-  };
-
-  const sendMessage = async () => {
-    if (!currentFriend || message.trim() === "") return;
-    socket.emit("sendMessage", { receiver: currentFriend, message });
-    setMessages((prev) => [...prev, { sender: "You", message }]);
-    setMessage("");
+    try {
+      await axios.post(
+        "http://localhost:5000/friends/reject",
+        { senderId },
+        { withCredentials: true }
+      );
+      alert("Заявка в друзья отклонена");
+      // Обновляем список заявок
+      const requestsRes = await axios.get("http://localhost:5000/friends/requests", { withCredentials: true });
+      setFriendRequests(requestsRes.data);
+    } catch (error) {
+      console.error("Ошибка при отклонении заявки:", error);
+      alert("Не удалось отклонить заявку");
+    }
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto space-y-4">
-      <h2 className="text-xl font-bold">Твой код:</h2>
-      <div className="p-2 border bg-gray-100 rounded">{userCode}</div>
+    <div className="flex h-screen">
+      {/* Левая колонка (Друзья + Заявки + Поиск) */}
+      <div className="w-1/4 bg-gray-100 p-4 border-r">
+        <h2 className="text-xl font-bold mb-2">Друзья</h2>
 
-      <h2 className="text-xl font-bold mt-4">Добавить друга</h2>
-      <input
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-        placeholder="Введите никнейм друга"
-        className="w-full px-3 py-2 border rounded"
-      />
-      <button onClick={sendFriendRequest} className="px-4 py-2 bg-blue-500 text-white rounded">
-        Отправить запрос
-      </button>
+        {/* 🔍 Поле для поиска */}
+        <input
+          type="text"
+          className="w-full p-2 mb-2 border rounded"
+          placeholder="🔍 Поиск по никнейму..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
-      <h2 className="text-xl font-bold mt-4">Запросы в друзья</h2>
-      {requests.map((req) => (
-        <div key={req.id} className="flex justify-between p-2 border">
-          <span>{req.sender_nickname}</span>
-          <button onClick={() => acceptRequest(req.sender_nickname)} className="px-3 py-1 bg-green-500 text-white rounded">
-            Принять
-          </button>
-        </div>
-      ))}
-
-      <h2 className="text-xl font-bold mt-4">Друзья</h2>
-      {friends.map((friend) => (
-        <div
-          key={friend.id}
-          className="p-2 border cursor-pointer hover:bg-gray-200 transition"
-          onClick={() => setCurrentFriend(friend.nickname)}
-        >
-          {friend.nickname}
-        </div>
-      ))}
-
-      {currentFriend && (
-        <>
-          <h2 className="text-xl font-bold mt-4">Чат с {currentFriend}</h2>
-          <div className="h-60 overflow-y-auto border p-2">
-            {messages.map((msg, index) => (
-              <div key={index}>
-                <strong>{msg.sender}:</strong> {msg.message}
-              </div>
-            ))}
+        {/* 🔍 Результаты поиска */}
+        {searchResults.length > 0 && (
+          <div className="bg-white p-2 border rounded mb-2">
+            <h3 className="text-sm font-bold">Результаты поиска:</h3>
+            <ul>
+              {searchResults.map((user) => (
+                <li key={user.id} className="p-2 border-b flex justify-between items-center">
+                  <span>{user.nickname}</span>
+                  <button
+                    className="bg-blue-500 text-white px-2 py-1 rounded"
+                    onClick={() => sendFriendRequest(user.id)}
+                  >
+                    Добавить
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
-          <input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Введите сообщение"
-            className="w-full px-3 py-2 border rounded"
-          />
-          <button onClick={sendMessage} className="px-4 py-2 bg-blue-500 text-white rounded">
-            Отправить
-          </button>
-        </>
-      )}
+        )}
+
+        {/* Список друзей */}
+        <ul>
+          {friends.map((friend) => (
+            <li key={friend.id} className="p-2 border-b cursor-pointer hover:bg-gray-200" onClick={() => setSelectedChat(friend)}>
+              {friend.nickname}
+            </li>
+          ))}
+        </ul>
+
+        {/* Заявки в друзья */}
+        <h2 className="text-xl font-bold mt-4 mb-2">Заявки в друзья</h2>
+        <ul>
+          {friendRequests.map((req) => (
+            <li key={req.id} className="p-2 border-b flex justify-between">
+              <span>{req.nickname}</span>
+              <div>
+                <button
+                  className="text-green-600 mr-2"
+                  onClick={() => handleAcceptRequest(req.id)}
+                >
+                  ✔
+                </button>
+                <button
+                  className="text-red-600"
+                  onClick={() => handleRejectRequest(req.id)}
+                >
+                  ✖
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Чат */}
+      <div className="flex-1 flex flex-col">
+        {selectedChat ? (
+          <>
+            <div className="bg-gray-200 p-4 text-lg font-bold border-b">{selectedChat.nickname}</div>
+            <div className="flex-1 p-4 overflow-y-auto">
+              {messages.map((msg, index) => (
+                <div key={index} className={`mb-2 p-2 rounded ${msg.sender_id === currentUser?.id ? "bg-blue-200 self-end" : "bg-gray-300 self-start"}`}>
+                  <strong>{msg.sender_nickname}:</strong> {msg.message}
+                </div>
+              ))}
+            </div>
+            <div className="p-4 border-t flex">
+              <input
+                type="text"
+                className="flex-1 p-2 border rounded"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                placeholder="Введите сообщение..."
+              />
+              <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded" onClick={sendMessage}>
+                Отправить
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-gray-500">
+            Выберите друга для начала чата
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default ChatPage;
