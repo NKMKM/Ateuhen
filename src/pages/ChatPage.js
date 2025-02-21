@@ -4,7 +4,8 @@ import { io } from "socket.io-client";
 const socket = io("http://localhost:5000", { withCredentials: true });
 
 export default function ChatApp() {
-  const [nickname, setNickname] = useState("");
+  const [userCode, setUserCode] = useState(""); // Код текущего пользователя
+  const [nickname, setNickname] = useState(""); // Никнейм друга
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
   const [currentFriend, setCurrentFriend] = useState(null);
@@ -12,6 +13,7 @@ export default function ChatApp() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    fetchUserName();
     fetchFriends();
     fetchRequests();
 
@@ -33,6 +35,13 @@ export default function ChatApp() {
     };
   }, [currentFriend]);
 
+  // Получение кода текущего пользователя
+  const fetchUserName = async () => {
+    const res = await fetch("http://localhost:5000/user/nickname", { credentials: "include" });
+    const data = await res.json();
+    setUserCode(data.code);
+  };
+
   const fetchFriends = async () => {
     const res = await fetch("http://localhost:5000/friends/list", { credentials: "include" });
     const data = await res.json();
@@ -52,6 +61,7 @@ export default function ChatApp() {
     setMessages(data);
   };
 
+  // Отправка запроса в друзья по никнейму
   const sendFriendRequest = async () => {
     await fetch("http://localhost:5000/friends/add", {
       method: "POST",
@@ -82,11 +92,14 @@ export default function ChatApp() {
 
   return (
     <div className="p-6 max-w-lg mx-auto space-y-4">
-      <h2 className="text-xl font-bold">Добавить друга</h2>
+      <h2 className="text-xl font-bold">Твой код:</h2>
+      <div className="p-2 border bg-gray-100 rounded">{userCode}</div>
+
+      <h2 className="text-xl font-bold mt-4">Добавить друга</h2>
       <input
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
-        placeholder="Введите никнейм"
+        placeholder="Введите никнейм друга"
         className="w-full px-3 py-2 border rounded"
       />
       <button onClick={sendFriendRequest} className="px-4 py-2 bg-blue-500 text-white rounded">
