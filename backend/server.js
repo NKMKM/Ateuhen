@@ -42,9 +42,11 @@ const io = new Server(server, {
 });
 
 // 🔹 WebSocket-соединение (Чат)
+// 🔹 WebSocket-соединение (Чат + Уведомления)
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
+  // Обработка сообщений чата
   socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
     try {
       const senderRes = await pool.query("SELECT nickname FROM users WHERE id = $1", [senderId]);
@@ -74,6 +76,12 @@ io.on("connection", (socket) => {
     } catch (error) {
       console.error("❌ Ошибка в WebSocket sendMessage:", error);
     }
+  });
+
+  // Уведомление клиента о удалении токена
+  socket.on("logout", (userId) => {
+    console.log(`User ${userId} logged out`);
+    io.emit("forceLogout", userId);
   });
 
   socket.on("disconnect", () => {
@@ -123,8 +131,24 @@ app.post("/auth/login", asyncHandler(async (req, res) => {
 
   const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: "1h" });
 
-  res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
-  res.json({ message: "Login successful", user });
+  // Получаем информацию об устройстве и браузере
+  const device = req.useragent.platform;
+  const browser = req.useragent.browser;
+  const ipAddress = req.ip;
+
+  // Создаем запись о входе
+  try {
+    await pool.query(
+      "INSERT INTO login_logs (user_id, device, browser, login_time, token, ip_address) VALUES ($1, $2, $3, NOW(), $4, $5)",
+      [user.id, device, browser, token, ipAddress]
+    );
+
+    res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
+    res.json({ message: "Login successful", user });
+  } catch (error) {
+    console.error("Ошибка при создании записи о входе:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }));
 
 // 🔹 Проверка аутентификации
@@ -134,16 +158,160 @@ app.get("/auth/check", asyncHandler(async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET);
+
+    // Проверяем, существует ли токен в базе данных
+    const session = await pool.query(
+      "SELECT * FROM login_logs WHERE token = $1 AND user_id = $2",
+      [token, decoded.id]
+    );
+
+    if (session.rows.length === 0) {
+      res.clearCookie("token", { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "Strict",
+        domain: "localhost",
+        path: "/"
+      });
+      return res.status(401).json({ message: "Session expired" });
+    }
+
     res.status(200).json({ user: decoded });
   } catch (error) {
+    res.clearCookie("token", { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: "Strict",
+      domain: "localhost",
+      path: "/"
+    });
     res.status(401).json({ message: "Invalid or expired token" });
   }
 }));
 
 // 🔹 Выход из системы
 app.post("/auth/logout", asyncHandler(async (req, res) => {
-  res.clearCookie("token", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  // Удаляем токен из таблицы login_logs
+  await pool.query("UPDATE login_logs SET token = NULL WHERE token = $1", [token]);
+
+  res.clearCookie("token", { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === "production", 
+    sameSite: "Strict",
+    domain: "localhost",
+    path: "/"
+  });
   res.status(200).json({ message: "Logged out successfully" });
+}));
+
+// 🔹 Получить все активные сессии пользователя
+app.get("/auth/sessions", asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  const decoded = jwt.verify(token, SECRET);
+  const userId = decoded.id;
+
+  // Получаем все активные сессии (логины) пользователя
+  const result = await pool.query(
+    "SELECT id, device, browser, login_time, ip_address, token FROM login_logs WHERE user_id = $1 AND token IS NOT NULL",
+    [userId]
+  );
+
+  res.json(result.rows);
+}));
+
+// 🔹 Удалить сессию (выход с устройства)
+app.delete("/auth/sessions/:sessionId", asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    const userId = decoded.id;
+    const sessionId = req.params.sessionId;
+
+    // Проверяем, существует ли сессия
+    const checkSession = await pool.query(
+      "SELECT * FROM login_logs WHERE id = $1 AND user_id = $2",
+      [sessionId, userId]
+    );
+
+    if (checkSession.rows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    // Удаляем сессию (устанавливаем token в NULL)
+    const result = await pool.query(
+      "UPDATE login_logs SET token = NULL WHERE id = $1 AND user_id = $2 RETURNING token",
+      [sessionId, userId]
+    );
+
+    const deletedSessionToken = result.rows[0].token;
+
+    // Если удалена текущая сессия, выкидываем пользователя
+    if (deletedSessionToken === token) {
+      res.clearCookie("token", { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "Strict",
+        domain: "localhost",
+        path: "/"
+      });
+
+      // Уведомляем клиента через WebSocket
+      io.emit("forceLogout", userId);
+
+      return res.status(200).json({ message: "Session deleted. You have been logged out." });
+    }
+
+    res.status(200).json({ message: "Session deleted" });
+  } catch (error) {
+    console.error("Ошибка при удалении сессии:", error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+}));
+
+// 🔹 Middleware для проверки активности сессии
+app.use(asyncHandler(async (req, res, next) => {
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, SECRET);
+
+      // Проверяем, существует ли токен в базе данных
+      const session = await pool.query(
+        "SELECT * FROM login_logs WHERE token = $1 AND user_id = $2",
+        [token, decoded.id]
+      );
+
+      if (session.rows.length === 0) {
+        res.clearCookie("token", { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === "production", 
+          sameSite: "Strict",
+          domain: "localhost",
+          path: "/"
+        });
+        return res.status(401).json({ message: "Session expired" });
+      }
+
+      req.user = decoded;
+    } catch (err) {
+      res.clearCookie("token", { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "Strict",
+        domain: "localhost",
+        path: "/"
+      });
+      return res.status(401).json({ message: "Invalid token" });
+    }
+  }
+  next();
 }));
 
 // 🔹 Отправить заявку в друзья
