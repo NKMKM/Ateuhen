@@ -252,3 +252,12 @@ body{
     font-weight: bold;
 }
 
+.text-violet-hover {
+    transition: all 0.3s ease-in-out;
+}
+  
+.text-violet-hover:hover {
+    color: #8a3cfa;
+    font-weight: bold;
+}
+

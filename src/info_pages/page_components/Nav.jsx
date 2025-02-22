@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 
+import { BsSun, BsMoon } from "react-icons/bs";
+
 const Nav = () => {
     const [isMenuVisible, setIsMenuVisible] = React.useState(false);
     const [timeoutId, setTimeoutId] = React.useState(null);
@@ -17,10 +19,15 @@ const Nav = () => {
         setTimeoutId(id); 
     };
 
+
+
     return (
     <>
     <nav className='flex flex-row h-[75px] items-center justify-between ml-10 '>
-        <Link to="/" className='text-4xl text-glow-hover font-bold cursor-pointer '>Logo</Link>
+        <div className='flex flex-row space-x-3'>
+          <Link to="/" className='text-4xl text-glow-hover font-bold cursor-pointer '>Logo</Link>
+
+        </div>
         <ul className='flex flex-row space-x-10 '>
           <li><Link to='/' className='text-glow-hover'>Home</Link></li>
           <li><Link to='/tournaments' className='text-glow-hover'>Tournaments</Link></li>
@@ -60,3 +67,11 @@ const Nav = () => {
 }
 
 export default Nav
+
+
+{/* <button
+onClick={toggleTheme}
+className=" mt-2 font-bold"
+>
+{isLightTheme === "dark" ? <BsMoon size={24} /> : <BsSun size={24} />  }
+</button> */}

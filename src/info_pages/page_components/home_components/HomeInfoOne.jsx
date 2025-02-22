@@ -32,9 +32,10 @@ const HomeInfoOne = () => {
       className={`opacity-0 translate-y-10 transition-all duration-700 ease-out ${
         isVisible ? "animate-fadeInUp opacity-100 translate-y-0" : ""
       } flex flex-col items-center`}
-    >        <p className='font-bold text-s cursor-pointer text-glow-hover'>Join</p>
+    >        
     {/* контейнер с текстом */}
         <div className='flex flex-col items-center m-10 w-[770px]'>
+            <p className='font-bold text-s cursor-pointer text-glow-hover'>Join</p>
             <h1 className='text-5xl font-bold text-center m-5 text-[#8A3CFA]'>Experience Competitive Gaming Like Never Before</h1>
             <p className='text-center'>At Ateuhen, we provide a unique ELO-based ranking system that matches players of similar skill levels. This ensures fair competition and a thrilling gaming experience for everyone.</p>
         </div>
