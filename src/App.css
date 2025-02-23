@@ -261,3 +261,23 @@ body{
     font-weight: bold;
 }
 
+
+  
+/* Стиль скролла только для .scroll-box */
+-webkit-scrollbar {
+    width: 1px;
+}
+  
+-webkit-scrollbar-track {
+    background: black;
+    border-radius: 50px;
+}
+  
+-webkit-scrollbar-thumb {
+    background: #8b3cfa;
+    border-radius: 5px;
+}
+  
+-webkit-scrollbar-thumb:hover {
+    background: #a56bff;
+}
