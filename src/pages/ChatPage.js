@@ -145,7 +145,7 @@ const ChatLayout = () => {
   const activeConversation = chats.find((chat) => chat.id === activeChat?.id);
 
   return (
-    <div className="w-full min-h-screen bg-black p-4 sm:p-6">
+    <div className="w-full max-h-screen bg-black p-4 sm:p-6">
       <Link to="/" className="w-[100px] h-[50px] border-2  rounded-lg flex items-center justify-center text-center fixed top-6 left-5 button-violet-hover"> <WestIcon fontSize="small"/> <p className="block w-[5px]"></p>Back</Link>
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-6">
         <div className="backdrop-blur-xl bg-black border-2 rounded-2xl p-4">
