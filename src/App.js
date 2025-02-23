@@ -13,7 +13,7 @@ import ChatPage from './pages/ChatPage';
 import AboutUs from './info_pages/AboutUs'
 import TestPage from './test_pages/TestPage';
 import Lobby from './pages/Lobby';
-
+import Test from './pages/TestPage';
 function App() {
   
   const [user, setUser] = useState(undefined); 
@@ -53,6 +53,7 @@ function App() {
         <Route path="/*" element={<NotFound />} />
         <Route path="/test_page" element={<TestPage/>} />
         <Route path="/testcard" element={<TestCard/>} />
+        <Route path="/settings" element={<Test/>} />
         <Route path="/chat" element={user ? <ChatPage user={user} /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
