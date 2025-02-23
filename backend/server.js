@@ -42,7 +42,6 @@ const io = new Server(server, {
   cors: { origin: "http://localhost:3000", credentials: true },
 });
 
-// 🔹 WebSocket-соединение (Чат)
 // 🔹 WebSocket-соединение (Чат + Уведомления)
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
@@ -50,11 +49,19 @@ io.on("connection", (socket) => {
   // Обработка сообщений чата
   socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
     try {
+      console.log(`Received message from ${senderId} to ${receiverId}: ${message}`);
+
       const senderRes = await pool.query("SELECT nickname FROM users WHERE id = $1", [senderId]);
-      if (senderRes.rows.length === 0) return;
+      if (senderRes.rows.length === 0) {
+        console.error(`Sender ${senderId} not found`);
+        return;
+      }
 
       const receiverRes = await pool.query("SELECT nickname FROM users WHERE id = $1", [receiverId]);
-      if (receiverRes.rows.length === 0) return;
+      if (receiverRes.rows.length === 0) {
+        console.error(`Receiver ${receiverId} not found`);
+        return;
+      }
 
       const senderNickname = senderRes.rows[0].nickname;
       const receiverNickname = receiverRes.rows[0].nickname;
@@ -65,6 +72,7 @@ io.on("connection", (socket) => {
       );
 
       const messageId = messageRes.rows[0].id;
+      console.log(`Message saved with ID: ${messageId}`);
 
       io.emit("receiveMessage", {
         id: messageId,
