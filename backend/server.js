@@ -29,6 +29,7 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
+  ssl: { rejectUnauthorized: false }
 });
 
 const SECRET = process.env.JWT_SECRET || "defaultsecret";
@@ -432,7 +433,7 @@ app.get("/chat/messages", asyncHandler(async (req, res) => {
        JOIN users u1 ON m.sender_id = u1.id
        JOIN users u2 ON m.receiver_id = u2.id
        WHERE (m.sender_id = $1 AND m.receiver_id = $2) OR (m.sender_id = $2 AND m.receiver_id = $1)
-       ORDER BY m.created_at`,
+       ORDER BY m.timestamp`,
       [senderId, receiverId]
     );
 

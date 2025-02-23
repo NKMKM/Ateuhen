@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import WestIcon from '@mui/icons-material/West';
 import axios from "axios";
 import io from "socket.io-client";
 import {
@@ -144,8 +146,9 @@ const ChatLayout = () => {
 
   return (
     <div className="w-full min-h-screen bg-black p-4 sm:p-6">
+      <Link to="/" className="w-[100px] h-[50px] border-2 border-gray-400 rounded-lg flex items-center justify-center text-center fixed top-6 left-5 button-violet-hover"> <WestIcon fontSize="small"/> <p className="block w-[5px]"></p>Back</Link>
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-6">
-        <div className="backdrop-blur-xl bg-black border border-white/10 rounded-2xl p-4">
+        <div className="backdrop-blur-xl bg-black border-2 border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-3 mb-6">
             <div className="relative flex-1">
               <Search
@@ -157,7 +160,7 @@ const ChatLayout = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search conversations..."
-                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg 
+                className="w-full pl-10 pr-4 py-2 bg-white/5 border  rounded-lg 
                 text-white placeholder-gray-400 focus:outline-none focus:ring-2 
                 focus:ring-white/20 transition-all"
               />
@@ -185,7 +188,7 @@ const ChatLayout = () => {
           </div>
         </div>
         {activeConversation ? (
-          <div className="backdrop-blur-xl bg-black border border-white/10 rounded-2xl flex flex-col">
+          <div className="backdrop-blur-xl bg-black border-2 border-[#AB70FD] rounded-2xl flex flex-col">
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -282,7 +285,7 @@ const ChatLayout = () => {
           <div className="backdrop-blur-xl bg-black border border-white/10 rounded-2xl flex items-center justify-center">
             <div className="text-center text-gray-400">
               <Users size={48} className="mx-auto mb-4 opacity-50" />
-              <p>Select a conversation to start chatting</p>
+              <p className="select-none">Select a conversation to start chatting</p>
             </div>
           </div>
         )}
