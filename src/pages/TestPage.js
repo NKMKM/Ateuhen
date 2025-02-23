@@ -13,7 +13,287 @@ import {
   Smartphone,
 } from "lucide-react";
 
-const Test = () => {
+// Компонент SidebarItem
+const SidebarItem = ({ icon, label, active = false, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors
+    ${active ? "bg-white/20 text-white" : "text-gray-300 hover:bg-white/10 hover:text-white"}`}
+  >
+    {icon}
+    <span>{label}</span>
+  </button>
+);
+
+// Компонент SettingsSection
+const SettingsSection = ({ title, children }) => (
+  <div className="space-y-4">
+    <h2 className="text-lg font-medium text-white">{title}</h2>
+    {children}
+  </div>
+);
+
+// Компонент Input
+const Input = ({ label, ...props }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-200">{label}</label>
+    <input
+      {...props}
+      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg 
+      text-white placeholder-gray-400 focus:outline-none focus:ring-2 
+      focus:ring-white/20 transition-all"
+    />
+  </div>
+);
+
+// Компонент Toggle
+const Toggle = ({ label, defaultChecked = false }) => (
+  <label className="flex items-center justify-between cursor-pointer">
+    <span className="text-gray-200">{label}</span>
+    <div className="relative">
+      <input
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        className="sr-only peer"
+      />
+      <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-white/30 transition-colors"></div>
+      <div className="absolute left-1 top-1 bg-gray-300 w-4 h-4 rounded-full transition-all peer-checked:bg-white peer-checked:translate-x-5"></div>
+    </div>
+  </label>
+);
+
+// Компонент SessionCard
+const SessionCard = ({ device, location, lastActive, isCurrentSession }) => (
+  <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        {device.includes("Mobile") ? (
+          <Smartphone className="text-white/60" />
+        ) : (
+          <Laptop className="text-white/60" />
+        )}
+        <div>
+          <p className="text-white font-medium">{device}</p>
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Globe size={14} />
+            <span>{location}</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {isCurrentSession ? (
+          <span className="text-xs bg-white/10 text-white px-2 py-1 rounded-full">
+            Current Session
+          </span>
+        ) : (
+          <button
+            onClick={() => {
+              if (window.confirm("Are you sure you want to end this session?")) {
+                console.log("Session terminated:", device);
+              }
+            }}
+            className="px-3 py-1.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-lg transition-all duration-200"
+          >
+            End Session
+          </button>
+        )}
+      </div>
+    </div>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2 text-sm text-gray-400">
+        <Clock size={14} />
+        <span>Last active: {lastActive}</span>
+      </div>
+      {!isCurrentSession && (
+        <button
+          className="text-xs text-gray-400 hover:text-white transition-colors"
+          onClick={() => {
+            if (window.confirm("Do you want to see more details about this session?")) {
+              console.log("Show details for:", device);
+            }
+          }}
+        >
+          View Details
+        </button>
+      )}
+    </div>
+  </div>
+);
+
+// Компонент ProfileSection
+const ProfileSection = () => (
+  <>
+    <h1 className="text-2xl font-semibold text-white">Profile Settings</h1>
+    <div className="space-y-8">
+      <SettingsSection title="Personal Information">
+        <div className="grid gap-4">
+          <Input label="Full Name" placeholder="John Doe" />
+          <Input label="Email" placeholder="john@example.com" type="email" />
+          <Input label="Phone" placeholder="+1 (555) 000-0000" type="tel" />
+          <Input
+            label="Bio"
+            placeholder="Tell us about yourself"
+            as="textarea"
+          />
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Active Sessions">
+        <div className="space-y-4">
+          <SessionCard
+            device="MacBook Pro"
+            location="New York, USA"
+            lastActive="Just now"
+            isCurrentSession={true}
+          />
+          <SessionCard
+            device="Mobile iPhone 13"
+            location="Los Angeles, USA"
+            lastActive="2 hours ago"
+            isCurrentSession={false}
+          />
+          <SessionCard
+            device="Windows PC"
+            location="London, UK"
+            lastActive="1 day ago"
+            isCurrentSession={false}
+          />
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Profile Preferences">
+        <div className="space-y-4">
+          <Toggle label="Public Profile" />
+          <Toggle label="Show Email" />
+          <Toggle label="Show Phone Number" />
+          <Toggle label="Available for Hire" />
+          <Toggle label="Show Online Status" defaultChecked />
+        </div>
+      </SettingsSection>
+    </div>
+  </>
+);
+
+// Компонент NotificationsSection
+const NotificationsSection = () => (
+  <>
+    <h1 className="text-2xl font-semibold text-white">Notifications</h1>
+    <div className="space-y-8">
+      <SettingsSection title="Email Notifications">
+        <div className="space-y-4">
+          <Toggle label="New Messages" defaultChecked />
+          <Toggle label="Account Updates" defaultChecked />
+          <Toggle label="Newsletter" />
+          <Toggle label="Product Updates" />
+          <Toggle label="Security Alerts" defaultChecked />
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Push Notifications">
+        <div className="space-y-4">
+          <Toggle label="Desktop Notifications" defaultChecked />
+          <Toggle label="Mobile Notifications" defaultChecked />
+          <Toggle label="Browser Notifications" />
+          <Toggle label="Sound" />
+          <Toggle label="Notification Preview" defaultChecked />
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Notification Schedule">
+        <div className="space-y-4">
+          <Toggle label="Do Not Disturb" />
+          <Input label="Quiet Hours Start" type="time" />
+          <Input label="Quiet Hours End" type="time" />
+        </div>
+      </SettingsSection>
+    </div>
+  </>
+);
+
+// Компонент PrivacySection
+const PrivacySection = () => (
+  <>
+    <h1 className="text-2xl font-semibold text-white">Privacy</h1>
+    <div className="space-y-8">
+      <SettingsSection title="Security">
+        <div className="space-y-4">
+          <Toggle label="Two-Factor Authentication" />
+          <Toggle label="Biometric Login" />
+          <Toggle label="Login Alerts" defaultChecked />
+          <Toggle label="Remember Devices" />
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Data & Privacy">
+        <div className="space-y-4">
+          <Toggle label="Data Collection" />
+          <Toggle label="Cookie Preferences" />
+          <Toggle label="Location Services" />
+          <Toggle label="Personalized Ads" />
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Account Access">
+        <div className="space-y-4">
+          <button className="w-full px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors">
+            Delete Account
+          </button>
+        </div>
+      </SettingsSection>
+    </div>
+  </>
+);
+
+// Компонент AppearanceSection
+const AppearanceSection = () => (
+  <>
+    <h1 className="text-2xl font-semibold text-white">Appearance</h1>
+    <div className="space-y-6">
+      <SettingsSection title="Theme">
+        <div className="space-y-4">
+          <Toggle label="Dark Mode" defaultChecked />
+          <Toggle label="High Contrast" />
+          <Toggle label="Reduce Animations" />
+        </div>
+      </SettingsSection>
+    </div>
+  </>
+);
+
+// Компонент GeneralSection
+const GeneralSection = () => (
+  <>
+    <h1 className="text-2xl font-semibold text-white">General Settings</h1>
+    <div className="space-y-6">
+      <SettingsSection title="Language">
+        <Input label="Preferred Language" placeholder="English" />
+      </SettingsSection>
+      <SettingsSection title="Time Zone">
+        <Input label="Time Zone" placeholder="UTC+0" />
+      </SettingsSection>
+    </div>
+  </>
+);
+
+// Компонент HelpSection
+const HelpSection = () => (
+  <>
+    <h1 className="text-2xl font-semibold text-white">Help & Support</h1>
+    <div className="space-y-6">
+      <SettingsSection title="Support">
+        <div className="space-y-4 text-gray-200">
+          <p>Need help? Contact our support team:</p>
+          <p className="text-gray-400">support@example.com</p>
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Documentation">
+        <div className="space-y-4 text-gray-200">
+          <p>
+            View our documentation for detailed information about using the
+            platform.
+          </p>
+        </div>
+      </SettingsSection>
+    </div>
+  </>
+);
+
+// Основной компонент SettingsLayout
+ const App = () => {
   const [activeSection, setActiveSection] = useState("profile");
 
   return (
@@ -86,244 +366,4 @@ const Test = () => {
   );
 };
 
-const SidebarItem = ({ icon, label, active = false, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors
-    ${active ? "bg-white/20 text-white" : "text-gray-300 hover:bg-white/10 hover:text-white"}`}
-  >
-    {icon}
-    <span>{label}</span>
-  </button>
-);
-
-const SettingsSection = ({ title, children }) => (
-  <div className="space-y-4">
-    <h2 className="text-lg font-medium text-white">{title}</h2>
-    {children}
-  </div>
-);
-
-const Input = ({ label, ...props }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-gray-200">{label}</label>
-    <input
-      {...props}
-      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg 
-      text-white placeholder-gray-400 focus:outline-none focus:ring-2 
-      focus:ring-white/20 transition-all"
-    />
-  </div>
-);
-
-const Toggle = ({ label, defaultChecked = false }) => (
-  <label className="flex items-center justify-between cursor-pointer">
-    <span className="text-gray-200">{label}</span>
-    <div className="relative">
-      <input
-        type="checkbox"
-        defaultChecked={defaultChecked}
-        className="sr-only peer"
-      />
-      <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-white/30 transition-colors"></div>
-      <div className="absolute left-1 top-1 bg-gray-300 w-4 h-4 rounded-full transition-all peer-checked:bg-white peer-checked:translate-x-5"></div>
-    </div>
-  </label>
-);
-
-const SessionCard = ({ device, location, lastActive, isCurrentSession }) => (
-  <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        {device.includes("Mobile") ? (
-          <Smartphone className="text-white/60" />
-        ) : (
-          <Laptop className="text-white/60" />
-        )}
-        <div>
-          <p className="text-white font-medium">{device}</p>
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <Globe size={14} />
-            <span>{location}</span>
-          </div>
-        </div>
-      </div>
-      {isCurrentSession && (
-        <span className="text-xs bg-white/10 text-white px-2 py-1 rounded-full">
-          Current Session
-        </span>
-      )}
-    </div>
-    <div className="flex items-center gap-2 text-sm text-gray-400">
-      <Clock size={14} />
-      <span>Last active: {lastActive}</span>
-    </div>
-  </div>
-);
-
-const ProfileSection = () => (
-  <>
-    <h1 className="text-2xl font-semibold text-white">Profile Settings</h1>
-    <div className="space-y-8">
-      <SettingsSection title="Personal Information">
-        <div className="grid gap-4">
-          <Input label="Full Name" placeholder="John Doe" />
-          <Input label="Email" placeholder="john@example.com" type="email" />
-          <Input label="Phone" placeholder="+1 (555) 000-0000" type="tel" />
-          <Input
-            label="Bio"
-            placeholder="Tell us about yourself"
-            as="textarea"
-          />
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Active Sessions">
-        <div className="space-y-4">
-          <SessionCard
-            device="MacBook Pro"
-            location="New York, USA"
-            lastActive="Just now"
-            isCurrentSession={true}
-          />
-          <SessionCard
-            device="Mobile iPhone 13"
-            location="Los Angeles, USA"
-            lastActive="2 hours ago"
-            isCurrentSession={false}
-          />
-          <SessionCard
-            device="Windows PC"
-            location="London, UK"
-            lastActive="1 day ago"
-            isCurrentSession={false}
-          />
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Profile Preferences">
-        <div className="space-y-4">
-          <Toggle label="Public Profile" />
-          <Toggle label="Show Email" />
-          <Toggle label="Show Phone Number" />
-          <Toggle label="Available for Hire" />
-          <Toggle label="Show Online Status" defaultChecked />
-        </div>
-      </SettingsSection>
-    </div>
-  </>
-);
-
-const NotificationsSection = () => (
-  <>
-    <h1 className="text-2xl font-semibold text-white">Notifications</h1>
-    <div className="space-y-8">
-      <SettingsSection title="Email Notifications">
-        <div className="space-y-4">
-          <Toggle label="New Messages" defaultChecked />
-          <Toggle label="Account Updates" defaultChecked />
-          <Toggle label="Newsletter" />
-          <Toggle label="Product Updates" />
-          <Toggle label="Security Alerts" defaultChecked />
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Push Notifications">
-        <div className="space-y-4">
-          <Toggle label="Desktop Notifications" defaultChecked />
-          <Toggle label="Mobile Notifications" defaultChecked />
-          <Toggle label="Browser Notifications" />
-          <Toggle label="Sound" />
-          <Toggle label="Notification Preview" defaultChecked />
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Notification Schedule">
-        <div className="space-y-4">
-          <Toggle label="Do Not Disturb" />
-          <Input label="Quiet Hours Start" type="time" />
-          <Input label="Quiet Hours End" type="time" />
-        </div>
-      </SettingsSection>
-    </div>
-  </>
-);
-
-const PrivacySection = () => (
-  <>
-    <h1 className="text-2xl font-semibold text-white">Privacy</h1>
-    <div className="space-y-8">
-      <SettingsSection title="Security">
-        <div className="space-y-4">
-          <Toggle label="Two-Factor Authentication" />
-          <Toggle label="Biometric Login" />
-          <Toggle label="Login Alerts" defaultChecked />
-          <Toggle label="Remember Devices" />
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Data & Privacy">
-        <div className="space-y-4">
-          <Toggle label="Data Collection" />
-          <Toggle label="Cookie Preferences" />
-          <Toggle label="Location Services" />
-          <Toggle label="Personalized Ads" />
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Account Access">
-        <div className="space-y-4">
-          <button className="w-full px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors">
-            Delete Account
-          </button>
-        </div>
-      </SettingsSection>
-    </div>
-  </>
-);
-
-const AppearanceSection = () => (
-  <>
-    <h1 className="text-2xl font-semibold text-white">Appearance</h1>
-    <div className="space-y-6">
-      <SettingsSection title="Theme">
-        <div className="space-y-4">
-          <Toggle label="Dark Mode" defaultChecked />
-          <Toggle label="High Contrast" />
-          <Toggle label="Reduce Animations" />
-        </div>
-      </SettingsSection>
-    </div>
-  </>
-);
-
-const GeneralSection = () => (
-  <>
-    <h1 className="text-2xl font-semibold text-white">General Settings</h1>
-    <div className="space-y-6">
-      <SettingsSection title="Language">
-        <Input label="Preferred Language" placeholder="English" />
-      </SettingsSection>
-      <SettingsSection title="Time Zone">
-        <Input label="Time Zone" placeholder="UTC+0" />
-      </SettingsSection>
-    </div>
-  </>
-);
-
-const HelpSection = () => (
-  <>
-    <h1 className="text-2xl font-semibold text-white">Help & Support</h1>
-    <div className="space-y-6">
-      <SettingsSection title="Support">
-        <div className="space-y-4 text-gray-200">
-          <p>Need help? Contact our support team:</p>
-          <p className="text-gray-400">support@example.com</p>
-        </div>
-      </SettingsSection>
-      <SettingsSection title="Documentation">
-        <div className="space-y-4 text-gray-200">
-          <p>
-            View our documentation for detailed information about using the
-            platform.
-          </p>
-        </div>
-      </SettingsSection>
-    </div>
-  </>
-);
-export default Test;
+export default App;

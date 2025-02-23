@@ -7,7 +7,6 @@ import HomePage from './pages/HomePage';
 import InfoPage from './info_pages/Home';
 import Premium from './info_pages/Premium';
 import NotFound from './info_pages/NotFound';
-import SessionsPage from './test_pages/SessionPage';
 import TestCard from './pages/TestCard';
 import ChatPage from './pages/ChatPage';
 import AboutUs from './info_pages/AboutUs'
@@ -46,7 +45,6 @@ function App() {
         <Route path="/register" element={user ? <Navigate to="/home" /> : <RegisterForm setUser={setUser} />} />
         <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage setUser={setUser} />} />
         <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/" />} />
-        <Route path="/sessions" element={user ? <SessionsPage setUser={setUser} /> : <Navigate to="/login" />} />
         <Route path="/premium" element={<Premium />} />
         <Route path="/about_us" element={<AboutUs />} />
         <Route path="/lobby" element={<Lobby />} />
