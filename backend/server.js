@@ -50,30 +50,38 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
     try {
       console.log(`Received message from ${senderId} to ${receiverId}: ${message}`);
-
-      const senderRes = await pool.query("SELECT nickname FROM users WHERE id = $1", [senderId]);
+  
+      // Проверка существования отправителя
+      const senderRes = await pool.query("SELECT id, nickname FROM users WHERE id = $1", [senderId]);
       if (senderRes.rows.length === 0) {
         console.error(`Sender ${senderId} not found`);
+        socket.emit("error", { message: `Sender ${senderId} not found` });
         return;
       }
-
-      const receiverRes = await pool.query("SELECT nickname FROM users WHERE id = $1", [receiverId]);
+  
+      // Проверка существования получателя
+      const receiverRes = await pool.query("SELECT id, nickname FROM users WHERE id = $1", [receiverId]);
       if (receiverRes.rows.length === 0) {
         console.error(`Receiver ${receiverId} not found`);
+        socket.emit("error", { message: `Receiver ${receiverId} not found` });
         return;
       }
-
+  
       const senderNickname = senderRes.rows[0].nickname;
       const receiverNickname = receiverRes.rows[0].nickname;
-
+  
+      // Сохранение сообщения в базе данных
       const messageRes = await pool.query(
-        "INSERT INTO messages (sender_id, receiver_id, message) VALUES ($1, $2, $3) RETURNING id",
+        "INSERT INTO messages (sender_id, receiver_id, message) VALUES ($1, $2, $3) RETURNING id, timestamp",
         [senderId, receiverId, message]
       );
-
+  
       const messageId = messageRes.rows[0].id;
+      const timestamp = messageRes.rows[0].timestamp;
+  
       console.log(`Message saved with ID: ${messageId}`);
-
+  
+      // Отправка сообщения получателю
       io.emit("receiveMessage", {
         id: messageId,
         senderId,
@@ -81,12 +89,13 @@ io.on("connection", (socket) => {
         receiverId,
         receiverNickname,
         message,
+        timestamp,
       });
     } catch (error) {
       console.error("❌ Ошибка в WebSocket sendMessage:", error);
+      socket.emit("error", { message: "Internal server error" });
     }
   });
-
   // Уведомление клиента о удалении токена
   socket.on("logout", (userId) => {
     console.log(`User ${userId} logged out`);
@@ -167,24 +176,6 @@ app.get("/auth/check", asyncHandler(async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET);
-
-    // Проверяем, существует ли токен в базе данных
-    const session = await pool.query(
-      "SELECT * FROM login_logs WHERE token = $1 AND user_id = $2",
-      [token, decoded.id]
-    );
-
-    if (session.rows.length === 0) {
-      res.clearCookie("token", { 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === "production", 
-        sameSite: "Strict",
-        domain: "localhost",
-        path: "/"
-      });
-      return res.status(401).json({ message: "Session expired" });
-    }
-
     res.status(200).json({ user: decoded });
   } catch (error) {
     res.clearCookie("token", { 
@@ -202,9 +193,6 @@ app.get("/auth/check", asyncHandler(async (req, res) => {
 app.post("/auth/logout", asyncHandler(async (req, res) => {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ message: "Not authenticated" });
-
-  // Удаляем токен из таблицы login_logs
-  await pool.query("UPDATE login_logs SET token = NULL WHERE token = $1", [token]);
 
   res.clearCookie("token", { 
     httpOnly: true, 
@@ -331,14 +319,29 @@ app.post("/friends/request", asyncHandler(async (req, res) => {
   }
 
   try {
-    await pool.query("INSERT INTO friend_requests (sender_id, receiver_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", 
-      [senderId, receiverId]);
+    // Проверяем, не отправил ли уже запрос
+    const existingRequest = await pool.query(
+      "SELECT * FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2",
+      [senderId, receiverId]
+    );
+
+    if (existingRequest.rows.length > 0) {
+      return res.status(400).json({ error: "Friend request already sent" });
+    }
+
+    // Создаем запрос в друзья
+    await pool.query(
+      "INSERT INTO friend_requests (sender_id, receiver_id) VALUES ($1, $2)",
+      [senderId, receiverId]
+    );
+
     res.json({ message: "Friend request sent" });
   } catch (error) {
     console.error("Ошибка отправки запроса в друзья:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
+
 
 // 🔹 Получить входящие заявки в друзья
 app.get("/friends/requests", asyncHandler(async (req, res) => {
@@ -347,49 +350,19 @@ app.get("/friends/requests", asyncHandler(async (req, res) => {
 
   const decoded = jwt.verify(token, SECRET);
   const result = await pool.query(
-    "SELECT users.id, users.nickname FROM friend_requests JOIN users ON friend_requests.sender_id = users.id WHERE friend_requests.receiver_id = $1",
+    `SELECT users.id, users.nickname, 
+    (SELECT COUNT(*) FROM friends 
+     WHERE (friends.user_id = users.id AND friends.friend_id = $1) 
+     OR (friends.friend_id = users.id AND friends.user_id = $1)) AS mutual_friends 
+    FROM friend_requests 
+    JOIN users ON friend_requests.sender_id = users.id 
+    WHERE friend_requests.receiver_id = $1`,
     [decoded.id]
   );
 
   res.json(result.rows);
 }));
 
-// 🔹 Принять заявку в друзья
-app.post("/friends/accept", asyncHandler(async (req, res) => {
-  const { senderId } = req.body;
-  if (!senderId) {
-    return res.status(400).json({ error: "Sender ID is required" });
-  }
-
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ message: "Not authenticated" });
-
-  const decoded = jwt.verify(token, SECRET);
-  const receiverId = decoded.id;
-
-  await pool.query("DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2", [senderId, receiverId]);
-  await pool.query("INSERT INTO friends (user_id, friend_id) VALUES ($1, $2), ($2, $1)", [senderId, receiverId]);
-
-  res.json({ message: "Friend request accepted" });
-}));
-
-// 🔹 Отклонить заявку в друзья
-app.post("/friends/reject", asyncHandler(async (req, res) => {
-  const { senderId } = req.body;
-  if (!senderId) {
-    return res.status(400).json({ error: "Sender ID is required" });
-  }
-
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ message: "Not authenticated" });
-
-  const decoded = jwt.verify(token, SECRET);
-  const receiverId = decoded.id;
-
-  await pool.query("DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2", [senderId, receiverId]);
-
-  res.json({ message: "Friend request rejected" });
-}));
 
 // 🔹 Получить список друзей
 app.get("/friends/list", asyncHandler(async (req, res) => {
@@ -448,6 +421,66 @@ app.get("/chat/messages", asyncHandler(async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error("Ошибка загрузки сообщений:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}));
+
+// 🔹 Принять заявку в друзья
+app.post("/api/friends/accept", asyncHandler(async (req, res) => {
+  const { senderId } = req.body;
+  if (!senderId) {
+    return res.status(400).json({ error: "Sender ID is required" });
+  }
+
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    const receiverId = decoded.id;
+
+    // Удаляем заявку из таблицы friend_requests
+    await pool.query(
+      "DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2",
+      [senderId, receiverId]
+    );
+
+    // Добавляем друзей в таблицу friends
+    await pool.query(
+      "INSERT INTO friends (user_id, friend_id) VALUES ($1, $2), ($2, $1)",
+      [senderId, receiverId]
+    );
+
+    res.json({ message: "Friend request accepted" });
+  } catch (error) {
+    console.error("Ошибка принятия заявки:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}));
+
+// 🔹 Отклонить заявку в друзья
+app.post("/api/friends/reject", asyncHandler(async (req, res) => {
+  const { senderId } = req.body;
+  if (!senderId) {
+    return res.status(400).json({ error: "Sender ID is required" });
+  }
+
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    const receiverId = decoded.id;
+
+    // Удаляем заявку из таблицы friend_requests
+    await pool.query(
+      "DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2",
+      [senderId, receiverId]
+    );
+
+    res.json({ message: "Friend request rejected" });
+  } catch (error) {
+    console.error("Ошибка отклонения заявки:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
