@@ -264,20 +264,21 @@ body{
 
   
 /* Стиль скролла только для .scroll-box */
--webkit-scrollbar {
-    width: 1px;
+::-webkit-scrollbar {
+    width: 7px; /* Ширина скроллбара */
 }
-  
--webkit-scrollbar-track {
-    background: black;
-    border-radius: 50px;
+
+::-webkit-scrollbar-track {
+    background: transparent; /* Прозрачный фон */
+    margin-right: 10px; /* Отступ справа */
+
 }
-  
--webkit-scrollbar-thumb {
-    background: #8b3cfa;
+
+::-webkit-scrollbar-thumb {
+    background: #8b3cfa; /* Цвет ползунка */
     border-radius: 5px;
 }
-  
--webkit-scrollbar-thumb:hover {
+
+::-webkit-scrollbar-thumb:hover {
     background: #a56bff;
 }
