@@ -1,9 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
+import { useState,useEffect } from 'react';
 
 import { BsSun, BsMoon } from "react-icons/bs";
 
-const Nav = () => {
+const Nav = ({ onToggleTheme }) => {
     const [isMenuVisible, setIsMenuVisible] = React.useState(false);
     const [timeoutId, setTimeoutId] = React.useState(null);
         const showMenu = () => {
@@ -19,6 +20,10 @@ const Nav = () => {
         setTimeoutId(id); 
     };
 
+    const handleThemeToggle = () => {
+      onToggleTheme(prevState => !prevState); // Меняем состояние темы
+    };
+
 
 
     return (
@@ -26,7 +31,7 @@ const Nav = () => {
     <nav className='flex flex-row h-[75px] items-center justify-between ml-10 '>
         <div className='flex flex-row space-x-3'>
           <Link to="/" className='text-4xl text-glow-hover font-bold cursor-pointer '>Logo</Link>
-
+          <button onClick={handleThemeToggle}>Сменить тему</button>
         </div>
         <ul className='flex flex-row space-x-10 '>
           <li><Link to='/' className='text-glow-hover'>Home</Link></li>

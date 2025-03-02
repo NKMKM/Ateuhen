@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import Nav from'./page_components/Nav';
 import Footer from'./page_components/Footer';
@@ -6,7 +7,6 @@ import Footer from'./page_components/Footer';
 const Premium = () => {
   return ( 
     <>
-        <Nav/>
         <div className='relative flex flex-col items-center'>
             <h1 className='absolute top-0 text-center text-[14em] font-bold -z-10 text-[#8A3CFA]'>Pricing</h1>
             <div className='flex bottom-0 flex-row space-x-7 w-[85%] mx-auto  my-48 z-20 '>

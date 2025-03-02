@@ -182,7 +182,6 @@ body{
     font-size: 1.2em;
     font-weight: normal;
     text-decoration: none;
-    color: white; /* Начальный цвет текста */
     cursor: pointer;
     padding-bottom: 2px; /* Отступ снизу для линии */
     transition: color 0.4s ease; /* Плавное изменение цвета текста */
@@ -264,21 +263,58 @@ body{
 
   
 /* Стиль скролла только для .scroll-box */
-::-webkit-scrollbar {
-    width: 7px; /* Ширина скроллбара */
+/* ::-webkit-scrollbar {
+    width: 7px; 
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent; /* Прозрачный фон */
-    margin-right: 10px; /* Отступ справа */
-
+    background: transparent;
+    
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #8b3cfa; /* Цвет ползунка */
+    background: #8b3cfa;
     border-radius: 5px;
+    position: relative;
+    right: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a56bff;
+} */
+
+
+
+/* Для Webkit-браузеров (Chrome, Safari) */
+::-webkit-scrollbar {
+    display: none;  /* Отключаем отображение скроллбара */
+}
+
+/* Для Firefox */
+body {
+    scrollbar-width: none;  /* Отключаем отображение скроллбара */
+}
+
+
+.container {
+    width: 100vw; /* Полная ширина окна */
+    height: 100vh; /* Полная высота окна, если нужно */
+    transition: all 0.3s ease; /* Плавное изменение */
+    margin: 0; /* Убираем возможные отступы */
+    padding: 0; /* Убираем внутренние отступы */
+    transition: all 0.3s ease; /* Плавное изменение */
+}
+
+/* Темная тема */
+.dark {
+    background-color: black;
+    width: 100%;
+    color: white;
+}
+
+/* Светлая тема */
+.light {
+    background-color: white;
+    color: black;
+    border-color: black;
 }

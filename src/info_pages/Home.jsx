@@ -4,12 +4,18 @@ import HomeInfoOne from '../info_pages/page_components/home_components/HomeInfoO
 import HomeInfoTwo from '../info_pages/page_components/home_components/HomeInfoTwo';
 import HomeInfoThree from '../info_pages/page_components/home_components/HomeInfoThree';
 import Blog from './page_components/home_components/Blog';
-import Nav from './page_components/Nav';
 import Footer from './page_components/Footer';
+import Scrollbar from '../components/ScrollBar';
+import Nav from './page_components/Nav';
+
 const MainPage = () => {
+
+
+  
   return (
     <>
         <Nav/>
+        <Scrollbar/>
         <WelcomeHome/>
         <HomeInfoOne/>
         <HomeInfoTwo/>
