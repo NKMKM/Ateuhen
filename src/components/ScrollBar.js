@@ -82,7 +82,7 @@ const CustomScrollbar = () => {
         right: 0,
         width: '10px',
         height: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: 'transparent',
         borderRadius: '5px',
         zIndex: '1000',
         cursor: 'pointer',

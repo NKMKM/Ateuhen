@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
-    <footer className='h-[420px] w-full  p-20 space-y-10 '>
-        <div className='flex flex-row justify-between'>
+    <footer className='sm:flex sm:flex-col sm:h-auto md:h-[420px] w-full  p-20 space-y-10 '>
+        <div className='sm:flex-col flex md:flex-row justify-between'>
             <div className='space-y-10'>
                 <h1 className='text-4xl font-bold  cursor-pointer text-glow-hover'>Logo</h1>
                 <ul className='flex flex-row space-x-10 '>

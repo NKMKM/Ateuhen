@@ -40,7 +40,7 @@ export default function App() {
   };
   return (
     <>
-        <div className="w-[50%] h-[890px] flex justify-center items-start relative overflow-hidden mt-5 pr-10 select-none">
+        <div className="sm:w-full  md:w-[80%] h-[890px]  flex justify-center items-start relative overflow-hidden mt-5 md:pr-10 select-none">
             <Swiper
                 loop={true}
                 spaceBetween={30}
@@ -67,7 +67,7 @@ export default function App() {
                         />
                     </div>
                     
-                    <div className="absolute bottom-30 left-0 w-full  text-white py-24">
+                    <div className="absolute bottom-30 left-0 w-full sm:px-10 md:px-0 text-white py-24">
                         <h3 className="text-2xl font-bold">{TextHeaderArray[index]}</h3>
                         <p className="text-lg">{TextParagraphArray[index]}</p>
                     </div>

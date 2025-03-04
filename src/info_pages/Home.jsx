@@ -15,7 +15,9 @@ const MainPage = () => {
   return (
     <>
         <Nav/>
-        <Scrollbar/>
+        <div className="sm:hidden md:block">
+          <Scrollbar />
+        </div>
         <WelcomeHome/>
         <HomeInfoOne/>
         <HomeInfoTwo/>
