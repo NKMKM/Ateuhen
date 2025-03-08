@@ -13,10 +13,13 @@ import AboutUs from './info_pages/AboutUs'
 import TestPage from './test_pages/TestPage';
 import Lobby from './pages/Lobby';
 import Test from './pages/TestPage';
+import Scrollbar from './components/ScrollBar';
+import Nav from './info_pages/page_components/Nav';
 function App() {
   
   const [user, setUser] = useState(undefined); 
   const [loading, setLoading] = useState(true); 
+
 
 
   useEffect(() => {
@@ -38,7 +41,8 @@ function App() {
   if (loading) return <div>Loading...</div>; 
 
   return (
-
+    
+   
     <Router>
       <Routes>
         <Route path="/" element={user ? <Navigate to="/home" /> : <InfoPage />} />
@@ -50,11 +54,14 @@ function App() {
         <Route path="/lobby" element={<Lobby />} />
         <Route path="/*" element={<NotFound />} />
         <Route path="/test_page" element={<TestPage/>} />
+        <Route path="/scrollbar" element={<Scrollbar/>} />
         <Route path="/testcard" element={<TestCard/>} />
         <Route path="/settings" element={<Test/>} />
         <Route path="/chat" element={user ? <ChatPage user={user} /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
+
+
 
 
   );

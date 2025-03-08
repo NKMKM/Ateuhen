@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
-    <footer className='h-[420px] w-full  p-20 space-y-10 '>
-        <div className='flex flex-row justify-between'>
+    <footer className='sm:flex sm:flex-col sm:h-auto md:h-[420px] w-full  p-20 space-y-10 '>
+        <div className='sm:flex-col flex md:flex-row justify-between'>
             <div className='space-y-10'>
                 <h1 className='text-4xl font-bold  cursor-pointer text-glow-hover'>Logo</h1>
                 <ul className='flex flex-row space-x-10 '>
@@ -19,7 +19,7 @@ const Footer = () => {
                 <form className='flex flex-col mb-4'>
                     <label className='my-4 font-bold text-glow-hover'>Subscribe</label>
                     <div className='flex flex-row space-x-4'>
-                        <input type='email' placeholder='Enter your email' className='w-[260px] h-[50px] p-2 bg-black border-2 border-white'></input>
+                        <input type='email' placeholder='Enter your email' className='w-[260px] h-[50px] p-2 border-2 border-white'></input>
                         <button className='w-[120px] h-[50px] border-2 border-white scale-hover'>Subscribe</button>
                     </div>
                 </form>

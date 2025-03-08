@@ -3,17 +3,17 @@ import { GoDotFill } from "react-icons/go";
 
 const Blog = () => {
   return (
-    <div>
+    <div className=' md:w-full' >
 
         {/* блок с текстом */}
-        <div className='flex flex-col justify-between items-center w-[770px] mx-auto h-[150px]'>
+        <div className='flex flex-col justify-between items-center md:w-[770px] mx-auto h-[150px]'>
             <p className='font-bold text-s cursor-pointer text-glow-hover'>Blog</p>
             <h1 className='font-bold text-5xl text-[#8A3CFA]'>Latest Gaming Insights</h1>
             <p>Stay updated with the latest in gaming.</p>
         </div>
 
         {/* блок с карточками */}
-        <div className='h-[600px] w-[1320px] flex flex-row space-x-10 mx-auto my-20 '>
+        <div className='sm:border-amber-300 sm:flex-col sm:w-full sm:h-auto md:h-[600px] md:w-[1320px] flex md:flex-row md:space-x-10 mx-auto my-20 '>
             {/* карточка */}
             <div className='w-1/3 scale-hover rounded-md custom-shadow'>
                 
