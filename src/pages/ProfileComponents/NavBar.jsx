@@ -20,7 +20,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <aside className="w-20 min-h-screen bg-black border-r border-white/10 flex flex-col items-center py-8">
+    <aside className="fixed top-0 left-0 w-20 h-screen bg-black border-r border-white/10 flex flex-col items-center py-8 z-50">
       <nav className="flex-1">
         <ul className="space-y-6">
           {navItems.map((item) => (

@@ -41,6 +41,7 @@ const ProfileContent = ({ activeTab, setAvatar, avatar }) => {
 
   if (activeTab === "profile") {
     return (
+      <div className="ml-20">
       <div className="px-8 py-6 bg-gradient-to-b from-transparent to-black text-white min-h-screen">
         <div className="flex gap-8">
           <div className="flex-1 space-y-6">
@@ -390,6 +391,7 @@ const ProfileContent = ({ activeTab, setAvatar, avatar }) => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     );
   }
