@@ -289,7 +289,7 @@ app.use(asyncHandler(async (req, res, next) => {
         res.clearCookie("token", { 
           httpOnly: true, 
           secure: process.env.NODE_ENV === "production", 
-          sameSite: "Strict",
+          sameSite: "Strict", 
           domain: "localhost",
           path: "/"
         });
@@ -425,7 +425,30 @@ app.get("/chat/messages", asyncHandler(async (req, res) => {
   }
 }));
 
-// 🔹 Принять заявку в друзья
+app.get("/api/user/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}));
+// Refresh User Data
+app.put("/api/user/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { first_name, second_name, nickname, email } = req.body;
+  try {
+    const { rows } = await pool.query(
+      "UPDATE users SET first_name = $1, second_name = $2, nickname = $3, email = $4 WHERE id = $5 RETURNING *",
+      [first_name, second_name, nickname, email, id]
+    );
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}));
+// Accept friend requests
 app.post("/api/friends/accept", asyncHandler(async (req, res) => {
   const { senderId } = req.body;
   if (!senderId) {

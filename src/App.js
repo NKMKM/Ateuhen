@@ -12,9 +12,9 @@ import ChatPage from './pages/ChatPage';
 import AboutUs from './info_pages/AboutUs'
 import TestPage from './test_pages/TestPage';
 import Lobby from './pages/Lobby';
-import Test from './pages/TestPage';
+import SettingsPage from './pages/SettingsPage';
 import Scrollbar from './components/ScrollBar';
-import Nav from './info_pages/page_components/Nav';
+import ProfilePage from './pages/ProfilePage';
 function App() {
   
   const [user, setUser] = useState(undefined); 
@@ -45,10 +45,16 @@ function App() {
    
     <Router>
       <Routes>
+        {/* NonAuthorizied page */}
         <Route path="/" element={user ? <Navigate to="/home" /> : <InfoPage />} />
         <Route path="/register" element={user ? <Navigate to="/home" /> : <RegisterForm setUser={setUser} />} />
         <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage setUser={setUser} />} />
-        <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/" />} />
+        {/* Authorizied page */}
+          <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/" />} />
+          <Route path="/chat" element={user ? <ChatPage user={user} /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={user ? <ProfilePage user={user} /> : <Navigate to="/login" />} />
+        {/* Test Pages (Not realized now) */}
+
         <Route path="/premium" element={<Premium />} />
         <Route path="/about_us" element={<AboutUs />} />
         <Route path="/lobby" element={<Lobby />} />
@@ -56,8 +62,8 @@ function App() {
         <Route path="/test_page" element={<TestPage/>} />
         <Route path="/scrollbar" element={<Scrollbar/>} />
         <Route path="/testcard" element={<TestCard/>} />
-        <Route path="/settings" element={<Test/>} />
-        <Route path="/chat" element={user ? <ChatPage user={user} /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={<SettingsPage/>} />
+
       </Routes>
     </Router>
 
@@ -69,19 +75,3 @@ function App() {
 
 export default App;
 
-
-{/* <Router>
-<Routes>
-  <Route path="/" element={user ? <Navigate to="/home" /> : <InfoPage />} />
-  <Route path="/register" element={user ? <Navigate to="/home" /> : <RegisterForm setUser={setUser} />} />
-  <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage setUser={setUser} />} />
-  <Route path="/home" element={user ? <HomePage user={user} setUser={setUser} /> : <Navigate to="/" />} />
-  <Route path="/sessions" element={user ? <SessionsPage setUser={setUser} /> : <Navigate to="/login" />} />
-  <Route path="/premium" element={<Premium />} />
-  <Route path="/about_us" element={<AboutUs />} />
-  <Route path="/*" element={<NotFound />} />
-  <Route path="/test_page" element={<TestPage/>} />
-  <Route path="/testcard" element={<TestCard/>} />
-  <Route path="/chat" element={user ? <ChatPage user={user} /> : <Navigate to="/login" />} />
-</Routes>
-</Router> */}
