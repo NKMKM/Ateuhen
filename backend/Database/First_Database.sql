@@ -6,6 +6,10 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    elo VARCHAR(64) DEFAULT 1000,
+    avatar VARCHAR(64),
+    banner VARCHAR (64)
+
 );
 
 CREATE TABLE login_logs (
