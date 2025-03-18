@@ -5,12 +5,17 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
 const useragent = require("express-useragent");
+const multer = require("multer");
 const asyncHandler = require("express-async-handler");
+const fs = require("fs");
 require("dotenv").config();
-
+const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: 5 * 1024 * 1024 }, // Ограничение на 5 МБ
+});
 app.use(useragent.express());
 app.use(express.json());
 app.use(cookieParser());
@@ -31,7 +36,15 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   ssl: { rejectUnauthorized: false }
 });
-
+//banner  setting 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
 const SECRET = process.env.JWT_SECRET || "defaultsecret";
 
 const { Server } = require("socket.io");
@@ -105,6 +118,91 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
   });
+});
+// exist or not?)
+app.get('/api/user/:nickname/exists', async (req, res) => {
+  const { nickname } = req.params;
+
+  try {
+      const query = 'SELECT id FROM users WHERE nickname = $1';
+      const result = await pool.query(query, [nickname]);
+
+      if (result.rows.length > 0) {
+          res.status(200).json({ exists: true });
+      } else {
+          res.status(404).json({ exists: false });
+      }
+  } catch (error) {
+      console.error('Ошибка при проверке пользователя:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get("/api/user/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(`Fetching user info for ID: ${id}`); // Логируем запрос
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    if (result.rows.length > 0) {
+      console.log(`User found: ${JSON.stringify(result.rows[0])}`); // Логируем результат
+      res.json(result.rows[0]);
+    } else {
+      console.log(`User not found for ID: ${id}`); // Логируем ошибку
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    console.error(`Error fetching user info for ID ${id}:`, err); // Логируем ошибку
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Папка для хранения баннеров
+const bannersDir = path.join(__dirname, 'banners');
+if (!fs.existsSync(bannersDir)) {
+  fs.mkdirSync(bannersDir, { recursive: true });
+}
+
+// Загрузка нового баннера
+app.put('/api/user/:id/banner', upload.single('banner'), (req, res) => {
+  const userId = req.params.id;
+  const file = req.file;
+
+  console.log(`Uploading banner for user ID: ${userId}`); // Логируем запрос
+
+  if (!file) {
+    console.log('No file uploaded for user ID:', userId); // Логируем ошибку
+    return res.status(400).send('No file uploaded');
+  }
+
+  const bannerPath = path.join(bannersDir, `${userId}.jpg`);
+
+  // Перемещаем файл из временной папки в папку banners
+  fs.rename(file.path, bannerPath, (err) => {
+    if (err) {
+      console.error('Error moving file for user ID:', userId, err); // Логируем ошибку
+      return res.status(500).send('Failed to update banner');
+    }
+
+    console.log(`Banner updated successfully for user ID: ${userId}`); // Логируем успех
+    res.send('Banner updated successfully');
+  });
+});
+
+// Получение баннера
+app.get('/api/user/:id/banner', (req, res) => {
+  const userId = req.params.id;
+  const bannerPath = path.join(__dirname, 'banners', `${userId}.jpg`);
+
+  console.log(`Fetching banner for user ID: ${userId}`); // Логируем запрос
+  console.log(`Banner path: ${bannerPath}`); // Логируем путь к файлу
+
+  if (fs.existsSync(bannerPath)) {
+    console.log(`Banner found for user ID: ${userId}`); // Логируем успех
+    res.sendFile(bannerPath);
+  } else {
+    console.log(`Banner not found for user ID: ${userId}`); // Логируем ошибку
+    res.status(404).send('Banner not found');
+  }
 });
 
 // 🔹 Регистрация пользователя

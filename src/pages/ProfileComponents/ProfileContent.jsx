@@ -47,13 +47,13 @@ const ProfileContent = ({ activeTab, setAvatar, avatar }) => {
           <div className="flex-1 space-y-6">
             <div className="relative">
               <div className="flex gap-6">
-                <div className="relative group">
+                <div className=" top-3 relative group">
                   <img
                     src={avatar}
                     alt="Profile Avatar"
                     className="w-32 h-32 rounded border-4 border-black object-cover grayscale"
                   />
-                  <label className="absolute bottom-0 right-0 bg-black/80 text-white p-3 cursor-pointer hover:bg-white hover:text-black transition-all opacity-0 group-hover:opacity-100 z-10">
+                  <label className="absolute bottom-7 right-0 bg-black/80 text-white p-3 cursor-pointer hover:bg-white hover:text-black transition-all opacity-0 group-hover:opacity-100 z-10">
                     <input
                       type="file"
                       className="hidden"
