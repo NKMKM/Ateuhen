@@ -156,6 +156,22 @@ app.get("/api/user/:id", async (req, res) => {
   }
 });
 
+app.get("/api/user/:nickname", async (req, res) => {
+  const { nickname } = req.params;
+
+  try {
+    const user = await User.findOne({ where: { nickname } });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // Папка для хранения баннеров
 const bannersDir = path.join(__dirname, 'banners');
 if (!fs.existsSync(bannersDir)) {

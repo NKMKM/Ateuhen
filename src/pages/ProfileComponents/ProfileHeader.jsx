@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { CameraIcon } from "lucide-react";
 
 const ProfileHeader = ({ id, currentUserId }) => {
-  console.log(`ProfileHeader rendered with id: ${id}, currentUserId: ${currentUserId}`); // Логируем id и currentUserId
-
   const [banner, setBanner] = useState(
     "https://images.unsplash.com/photo-1533747122906-9626d027083e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
   );
@@ -14,12 +12,8 @@ const ProfileHeader = ({ id, currentUserId }) => {
 
   // Загрузка баннера
   const fetchBanner = async () => {
-    if (!id) {
-      console.error("User ID is undefined. Cannot fetch banner."); // Логируем ошибку, если id отсутствует
-      return;
-    }
+    if (!id) return;
 
-    console.log(`Fetching banner for user ID: ${id}`); // Логируем запрос
     try {
       const response = await fetch(`http://localhost:5000/api/user/${id}/banner?${Date.now()}`, {
         credentials: "include",
@@ -27,7 +21,7 @@ const ProfileHeader = ({ id, currentUserId }) => {
 
       if (!response.ok) {
         if (response.status === 404) {
-          console.log("Banner not found, using default banner"); // Логируем ошибку 404
+          console.log("Banner not found, using default banner");
           return;
         }
         throw new Error("Failed to fetch banner");
@@ -35,10 +29,9 @@ const ProfileHeader = ({ id, currentUserId }) => {
 
       const blob = await response.blob();
       const newBannerUrl = URL.createObjectURL(blob);
-      console.log("New banner URL:", newBannerUrl); // Логируем новый URL
       setBanner(newBannerUrl);
     } catch (error) {
-      console.error("Error fetching banner:", error); // Логируем ошибку
+      console.error("Error fetching banner:", error);
     }
   };
 
@@ -56,7 +49,6 @@ const ProfileHeader = ({ id, currentUserId }) => {
         return;
       }
 
-      console.log(`Uploading new banner for user ID: ${id}`); // Логируем запрос
       const formData = new FormData();
       formData.append("banner", file);
 
@@ -74,11 +66,10 @@ const ProfileHeader = ({ id, currentUserId }) => {
 
         const blob = await response.blob();
         const newBannerUrl = URL.createObjectURL(blob);
-        console.log("Updated banner URL:", newBannerUrl); // Логируем новый URL
         setBanner(newBannerUrl);
         alert("Banner updated successfully!");
       } catch (error) {
-        console.error("Error updating banner:", error); // Логируем ошибку
+        console.error("Error updating banner:", error);
         alert("Failed to update banner. Please try again.");
       }
     }
@@ -97,29 +88,22 @@ const ProfileHeader = ({ id, currentUserId }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Загрузка баннера при монтировании компонента
+  // Загрузка баннера при изменении id
   useEffect(() => {
     if (id) {
-      console.log("Fetching banner for user ID:", id); // Логируем начало загрузки
       fetchBanner();
-    } else {
-      console.error("User ID is undefined. Cannot fetch banner."); // Логируем ошибку, если id отсутствует
     }
-  }, [id]); // Зависимость от id
+  }, [id]);
 
   return (
     <div className="sticky top-0 z-0">
       <div
         className="h-[40vh] w-full bg-cover bg-center relative grayscale"
-        style={{
-          backgroundImage: `url(${banner})`,
-        }}
+        style={{ backgroundImage: `url(${banner})` }}
       >
         <div
           className="absolute inset-0 bg-black transition-opacity duration-300"
-          style={{
-            opacity: scrollOpacity,
-          }}
+          style={{ opacity: scrollOpacity }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black" />
         {isOwner && showBannerButton && (

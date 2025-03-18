@@ -1,38 +1,46 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from '../AuthContext'; // Импортируем хук
-import ProfileHeader from './ProfileComponents/ProfileHeader';
-import NavBar from './ProfileComponents/NavBar';
-import ProfileContent from './ProfileComponents/ProfileContent';
-import DefaultAvatar from '../assets/DefaultAvatar.png';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../AuthContext";
+import ProfileHeader from "./ProfileComponents/ProfileHeader";
+import NavBar from "./ProfileComponents/NavBar";
+import ProfileContent from "./ProfileComponents/ProfileContent";
 
 function ProfilePage({ user }) {
-  const [activeTab, setActiveTab] = useState("profile");
-  const [avatar, setAvatar] = useState(DefaultAvatar);
-  const id = user?.id;
-  const { currentUserId } = useAuth(); // Получаем currentUserId из контекста
+  const { nickname } = useParams();
+  const { currentUserId } = useAuth();
+  const [profileUser, setProfileUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Логируем user и id при изменении
+  // Загрузка данных пользователя
   useEffect(() => {
-    console.log("ProfilePage user updated:", user);
-    console.log("ProfilePage id updated:", id);
-  }, [user, id]);
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/user/${encodeURIComponent(nickname)}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+        const data = await response.json();
+        setProfileUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [nickname]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!profileUser) return <div>User not found</div>;
 
   return (
     <div className="flex w-full min-h-screen bg-black text-white">
-      <NavBar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        avatar={avatar}
-      />
+      <NavBar />
       <main className="flex-1 min-h-screen relative">
-        {/* Используем key для принудительного обновления ProfileHeader */}
-        <ProfileHeader key={id} id={id} currentUserId={currentUserId} />
+        <ProfileHeader key={profileUser.id} id={profileUser.id} currentUserId={currentUserId} />
         <div className="relative z-10 -mt-[20vh]">
-          <ProfileContent
-            activeTab={activeTab}
-            setAvatar={setAvatar}
-            avatar={avatar}
-          />
+          <ProfileContent activeTab="profile" />
         </div>
       </main>
     </div>
