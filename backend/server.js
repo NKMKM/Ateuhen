@@ -522,23 +522,6 @@ app.get("/api/user/:nickname", async (req, res) => {
   }
 });
 
-// 🔹 Получить аватар пользователя
-app.get("/api/user/:nickname/avatar", async (req, res) => {
-  const { nickname } = req.params;
-  try {
-    const result = await pool.query("SELECT avatar_path FROM users WHERE nickname = $1", [nickname]);
-    if (result.rows.length > 0 && result.rows[0].avatar) {
-      res.set("Content-Type", "image/png");
-      res.send(result.rows[0].avatar);
-    } else {
-      res.status(404).json({ message: "Avatar not found" });
-    }
-  } catch (err) {
-    console.error("Error fetching avatar:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
 app.put("/api/user/:nickname/avatar", upload.single("avatar"), async (req, res) => {
   const { nickname } = req.params;
   const file = req.file;
