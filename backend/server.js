@@ -12,10 +12,13 @@ require("dotenv").config();
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Настройка Multer для загрузки файлов
 const upload = multer({
-  dest: 'uploads/',
+  dest: "uploads/",
   limits: { fileSize: 5 * 1024 * 1024 }, // Ограничение на 5 МБ
 });
+
 app.use(useragent.express());
 app.use(express.json());
 app.use(cookieParser());
@@ -28,73 +31,55 @@ app.use(
 
 app.set("trust proxy", true);
 
+// Подключение к PostgreSQL
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
 });
-//banner  setting 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+
 const SECRET = process.env.JWT_SECRET || "defaultsecret";
 
+// WebSocket
 const { Server } = require("socket.io");
 const http = require("http");
-
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "http://localhost:3000", credentials: true },
 });
 
-// 🔹 WebSocket-соединение (Чат + Уведомления)
+// WebSocket-соединение
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  // Обработка сообщений чата
   socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
     try {
-      console.log(`Received message from ${senderId} to ${receiverId}: ${message}`);
-  
-      // Проверка существования отправителя
       const senderRes = await pool.query("SELECT id, nickname FROM users WHERE id = $1", [senderId]);
       if (senderRes.rows.length === 0) {
-        console.error(`Sender ${senderId} not found`);
         socket.emit("error", { message: `Sender ${senderId} not found` });
         return;
       }
-  
-      // Проверка существования получателя
+
       const receiverRes = await pool.query("SELECT id, nickname FROM users WHERE id = $1", [receiverId]);
       if (receiverRes.rows.length === 0) {
-        console.error(`Receiver ${receiverId} not found`);
         socket.emit("error", { message: `Receiver ${receiverId} not found` });
         return;
       }
-  
+
       const senderNickname = senderRes.rows[0].nickname;
       const receiverNickname = receiverRes.rows[0].nickname;
-  
-      // Сохранение сообщения в базе данных
+
       const messageRes = await pool.query(
         "INSERT INTO messages (sender_id, receiver_id, message) VALUES ($1, $2, $3) RETURNING id, timestamp",
         [senderId, receiverId, message]
       );
-  
+
       const messageId = messageRes.rows[0].id;
       const timestamp = messageRes.rows[0].timestamp;
-  
-      console.log(`Message saved with ID: ${messageId}`);
-  
-      // Отправка сообщения получателю
+
       io.emit("receiveMessage", {
         id: messageId,
         senderId,
@@ -105,11 +90,11 @@ io.on("connection", (socket) => {
         timestamp,
       });
     } catch (error) {
-      console.error("❌ Ошибка в WebSocket sendMessage:", error);
+      console.error("Error in WebSocket sendMessage:", error);
       socket.emit("error", { message: "Internal server error" });
     }
   });
-  // Уведомление клиента о удалении токена
+
   socket.on("logout", (userId) => {
     console.log(`User ${userId} logged out`);
     io.emit("forceLogout", userId);
@@ -119,105 +104,42 @@ io.on("connection", (socket) => {
     console.log(`User disconnected: ${socket.id}`);
   });
 });
-// exist or not?)
-app.get('/api/user/:nickname/exists', async (req, res) => {
-  const { nickname } = req.params;
-
-  try {
-      const query = 'SELECT id FROM users WHERE nickname = $1';
-      const result = await pool.query(query, [nickname]);
-
-      if (result.rows.length > 0) {
-          res.status(200).json({ exists: true });
-      } else {
-          res.status(404).json({ exists: false });
-      }
-  } catch (error) {
-      console.error('Ошибка при проверке пользователя:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-app.get("/api/user/:id", async (req, res) => {
-  const { id } = req.params;
-  console.log(`Fetching user info for ID: ${id}`); // Логируем запрос
-  try {
-    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-    if (result.rows.length > 0) {
-      console.log(`User found: ${JSON.stringify(result.rows[0])}`); // Логируем результат
-      res.json(result.rows[0]);
-    } else {
-      console.log(`User not found for ID: ${id}`); // Логируем ошибку
-      res.status(404).json({ message: "User not found" });
-    }
-  } catch (err) {
-    console.error(`Error fetching user info for ID ${id}:`, err); // Логируем ошибку
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-app.get("/api/user/:nickname", async (req, res) => {
-  const { nickname } = req.params;
-
-  try {
-    const user = await User.findOne({ where: { nickname } });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 
 // Папка для хранения баннеров
-const bannersDir = path.join(__dirname, 'banners');
+const bannersDir = path.join(__dirname, "banners");
 if (!fs.existsSync(bannersDir)) {
   fs.mkdirSync(bannersDir, { recursive: true });
 }
 
 // Загрузка нового баннера
-app.put('/api/user/:id/banner', upload.single('banner'), (req, res) => {
+app.put("/api/user/:id/banner", upload.single("banner"), (req, res) => {
   const userId = req.params.id;
   const file = req.file;
 
-  console.log(`Uploading banner for user ID: ${userId}`); // Логируем запрос
-
   if (!file) {
-    console.log('No file uploaded for user ID:', userId); // Логируем ошибку
-    return res.status(400).send('No file uploaded');
+    return res.status(400).send("No file uploaded");
   }
 
   const bannerPath = path.join(bannersDir, `${userId}.jpg`);
 
-  // Перемещаем файл из временной папки в папку banners
   fs.rename(file.path, bannerPath, (err) => {
     if (err) {
-      console.error('Error moving file for user ID:', userId, err); // Логируем ошибку
-      return res.status(500).send('Failed to update banner');
+      console.error("Error moving file:", err);
+      return res.status(500).send("Failed to update banner");
     }
-
-    console.log(`Banner updated successfully for user ID: ${userId}`); // Логируем успех
-    res.send('Banner updated successfully');
+    res.send("Banner updated successfully");
   });
 });
 
 // Получение баннера
-app.get('/api/user/:id/banner', (req, res) => {
+app.get("/api/user/:id/banner", (req, res) => {
   const userId = req.params.id;
-  const bannerPath = path.join(__dirname, 'banners', `${userId}.jpg`);
-
-  console.log(`Fetching banner for user ID: ${userId}`); // Логируем запрос
-  console.log(`Banner path: ${bannerPath}`); // Логируем путь к файлу
+  const bannerPath = path.join(bannersDir, `${userId}.jpg`);
 
   if (fs.existsSync(bannerPath)) {
-    console.log(`Banner found for user ID: ${userId}`); // Логируем успех
     res.sendFile(bannerPath);
   } else {
-    console.log(`Banner not found for user ID: ${userId}`); // Логируем ошибку
-    res.status(404).send('Banner not found');
+    res.status(404).send("Banner not found");
   }
 });
 
@@ -263,12 +185,10 @@ app.post("/auth/login", asyncHandler(async (req, res) => {
 
   const token = jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: "1h" });
 
-  // Получаем информацию об устройстве и браузере
   const device = req.useragent.platform;
   const browser = req.useragent.browser;
   const ipAddress = req.ip;
 
-  // Создаем запись о входе
   try {
     await pool.query(
       "INSERT INTO login_logs (user_id, device, browser, login_time, token, ip_address) VALUES ($1, $2, $3, NOW(), $4, $5)",
@@ -278,7 +198,7 @@ app.post("/auth/login", asyncHandler(async (req, res) => {
     res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
     res.json({ message: "Login successful", user });
   } catch (error) {
-    console.error("Ошибка при создании записи о входе:", error);
+    console.error("Error creating login log:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
@@ -326,7 +246,6 @@ app.get("/auth/sessions", asyncHandler(async (req, res) => {
   const decoded = jwt.verify(token, SECRET);
   const userId = decoded.id;
 
-  // Получаем все активные сессии (логины) пользователя
   const result = await pool.query(
     "SELECT id, device, browser, login_time, ip_address, token FROM login_logs WHERE user_id = $1 AND token IS NOT NULL",
     [userId]
@@ -345,7 +264,6 @@ app.delete("/auth/sessions/:sessionId", asyncHandler(async (req, res) => {
     const userId = decoded.id;
     const sessionId = req.params.sessionId;
 
-    // Проверяем, существует ли сессия
     const checkSession = await pool.query(
       "SELECT * FROM login_logs WHERE id = $1 AND user_id = $2",
       [sessionId, userId]
@@ -355,7 +273,6 @@ app.delete("/auth/sessions/:sessionId", asyncHandler(async (req, res) => {
       return res.status(404).json({ error: "Session not found" });
     }
 
-    // Удаляем сессию (устанавливаем token в NULL)
     const result = await pool.query(
       "UPDATE login_logs SET token = NULL WHERE id = $1 AND user_id = $2 RETURNING token",
       [sessionId, userId]
@@ -363,7 +280,6 @@ app.delete("/auth/sessions/:sessionId", asyncHandler(async (req, res) => {
 
     const deletedSessionToken = result.rows[0].token;
 
-    // Если удалена текущая сессия, выкидываем пользователя
     if (deletedSessionToken === token) {
       res.clearCookie("token", { 
         httpOnly: true, 
@@ -373,7 +289,6 @@ app.delete("/auth/sessions/:sessionId", asyncHandler(async (req, res) => {
         path: "/"
       });
 
-      // Уведомляем клиента через WebSocket
       io.emit("forceLogout", userId);
 
       return res.status(200).json({ message: "Session deleted. You have been logged out." });
@@ -381,7 +296,7 @@ app.delete("/auth/sessions/:sessionId", asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "Session deleted" });
   } catch (error) {
-    console.error("Ошибка при удалении сессии:", error);
+    console.error("Error deleting session:", error);
     res.status(500).json({ error: "Internal server error", details: error.message });
   }
 }));
@@ -393,7 +308,6 @@ app.use(asyncHandler(async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, SECRET);
 
-      // Проверяем, существует ли токен в базе данных
       const session = await pool.query(
         "SELECT * FROM login_logs WHERE token = $1 AND user_id = $2",
         [token, decoded.id]
@@ -433,7 +347,6 @@ app.post("/friends/request", asyncHandler(async (req, res) => {
   }
 
   try {
-    // Проверяем, не отправил ли уже запрос
     const existingRequest = await pool.query(
       "SELECT * FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2",
       [senderId, receiverId]
@@ -443,7 +356,6 @@ app.post("/friends/request", asyncHandler(async (req, res) => {
       return res.status(400).json({ error: "Friend request already sent" });
     }
 
-    // Создаем запрос в друзья
     await pool.query(
       "INSERT INTO friend_requests (sender_id, receiver_id) VALUES ($1, $2)",
       [senderId, receiverId]
@@ -451,11 +363,10 @@ app.post("/friends/request", asyncHandler(async (req, res) => {
 
     res.json({ message: "Friend request sent" });
   } catch (error) {
-    console.error("Ошибка отправки запроса в друзья:", error);
+    console.error("Error sending friend request:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
-
 
 // 🔹 Получить входящие заявки в друзья
 app.get("/friends/requests", asyncHandler(async (req, res) => {
@@ -476,7 +387,6 @@ app.get("/friends/requests", asyncHandler(async (req, res) => {
 
   res.json(result.rows);
 }));
-
 
 // 🔹 Получить список друзей
 app.get("/friends/list", asyncHandler(async (req, res) => {
@@ -503,7 +413,7 @@ app.get("/friends/search", asyncHandler(async (req, res) => {
     const result = await pool.query("SELECT id, nickname FROM users WHERE nickname ILIKE $1", [`%${nickname}%`]);
     res.json(result.rows);
   } catch (error) {
-    console.error("Ошибка поиска друзей:", error);
+    console.error("Error searching friends:", error);
     res.status(500).json({ error: "Server error" });
   }
 }));
@@ -534,35 +444,12 @@ app.get("/chat/messages", asyncHandler(async (req, res) => {
 
     res.json(result.rows);
   } catch (error) {
-    console.error("Ошибка загрузки сообщений:", error);
+    console.error("Error fetching messages:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
 
-app.get("/api/user/:id", asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  try {
-    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-    res.json(rows[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}));
-// Refresh User Data
-app.put("/api/user/:id", asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { first_name, second_name, nickname, email } = req.body;
-  try {
-    const { rows } = await pool.query(
-      "UPDATE users SET first_name = $1, second_name = $2, nickname = $3, email = $4 WHERE id = $5 RETURNING *",
-      [first_name, second_name, nickname, email, id]
-    );
-    res.json(rows[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}));
-// Accept friend requests
+// 🔹 Принять заявку в друзья
 app.post("/api/friends/accept", asyncHandler(async (req, res) => {
   const { senderId } = req.body;
   if (!senderId) {
@@ -576,13 +463,11 @@ app.post("/api/friends/accept", asyncHandler(async (req, res) => {
     const decoded = jwt.verify(token, SECRET);
     const receiverId = decoded.id;
 
-    // Удаляем заявку из таблицы friend_requests
     await pool.query(
       "DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2",
       [senderId, receiverId]
     );
 
-    // Добавляем друзей в таблицу friends
     await pool.query(
       "INSERT INTO friends (user_id, friend_id) VALUES ($1, $2), ($2, $1)",
       [senderId, receiverId]
@@ -590,7 +475,7 @@ app.post("/api/friends/accept", asyncHandler(async (req, res) => {
 
     res.json({ message: "Friend request accepted" });
   } catch (error) {
-    console.error("Ошибка принятия заявки:", error);
+    console.error("Error accepting friend request:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
@@ -609,7 +494,6 @@ app.post("/api/friends/reject", asyncHandler(async (req, res) => {
     const decoded = jwt.verify(token, SECRET);
     const receiverId = decoded.id;
 
-    // Удаляем заявку из таблицы friend_requests
     await pool.query(
       "DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2",
       [senderId, receiverId]
@@ -617,10 +501,182 @@ app.post("/api/friends/reject", asyncHandler(async (req, res) => {
 
     res.json({ message: "Friend request rejected" });
   } catch (error) {
-    console.error("Ошибка отклонения заявки:", error);
+    console.error("Error rejecting friend request:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }));
+
+// 🔹 Получить данные пользователя по nickname
+app.get("/api/user/:nickname", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE nickname = $1", [nickname]);
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Получить аватар пользователя
+app.get("/api/user/:nickname/avatar", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query("SELECT avatar_path FROM users WHERE nickname = $1", [nickname]);
+    if (result.rows.length > 0 && result.rows[0].avatar) {
+      res.set("Content-Type", "image/png");
+      res.send(result.rows[0].avatar);
+    } else {
+      res.status(404).json({ message: "Avatar not found" });
+    }
+  } catch (err) {
+    console.error("Error fetching avatar:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.put("/api/user/:nickname/avatar", upload.single("avatar"), async (req, res) => {
+  const { nickname } = req.params;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  try {
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const relativePath = path.join("uploads", fileName); // Относительный путь
+    const absolutePath = path.join(__dirname, relativePath); // Абсолютный путь для сохранения файла
+
+    // Перемещаем файл из временной папки в папку uploads
+    fs.renameSync(file.path, absolutePath);
+
+    // Сохраняем относительный путь к файлу в базу данных
+    await pool.query("UPDATE users SET avatar_path = $1 WHERE nickname = $2", [relativePath, nickname]);
+
+    res.json({ message: "Avatar updated successfully", avatarPath: relativePath });
+  } catch (err) {
+    console.error("Error updating avatar:", err);
+
+    // Удаляем временный файл в случае ошибки
+    if (file && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+
+    res.status(500).json({ message: "Server error" });
+  }
+});
+// 🔹 Получить аватар пользователя
+app.get("/api/user/:nickname/avatar", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query("SELECT avatar_path FROM users WHERE nickname = $1", [nickname]);
+    if (result.rows.length > 0 && result.rows[0].avatar_path) {
+      const avatarPath = path.join(__dirname, result.rows[0].avatar_path);
+
+      if (fs.existsSync(avatarPath)) {
+        const mimeType = {
+          ".jpg": "image/jpeg",
+          ".jpeg": "image/jpeg",
+          ".png": "image/png",
+          ".gif": "image/gif",
+        };
+
+        const ext = path.extname(avatarPath).toLowerCase();
+        const contentType = mimeType[ext] || "application/octet-stream";
+
+        res.set("Content-Type", contentType);
+        res.sendFile(avatarPath);
+      } else {
+        res.status(404).json({ message: "Avatar file not found" });
+      }
+    } else {
+      res.status(404).json({ message: "Avatar not found" });
+    }
+  } catch (err) {
+    console.error("Error fetching avatar:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Получить турниры пользователя
+app.get("/api/user/:nickname/tournaments", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT t.name, tr.position FROM tournaments t JOIN tournament_results tr ON t.id = tr.tournament_id WHERE tr.user_id = (SELECT id FROM users WHERE nickname = $1)",
+      [nickname]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching tournaments:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Получить активность пользователя
+app.get("/api/user/:nickname/activity", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT activity_type, description, timestamp FROM activity_feed WHERE user_id = (SELECT id FROM users WHERE nickname = $1) ORDER BY timestamp DESC",
+      [nickname]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching activity:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Получить хайлайты пользователя
+app.get("/api/user/:nickname/highlights", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT title, description, views, timestamp FROM highlights WHERE user_id = (SELECT id FROM users WHERE nickname = $1) ORDER BY timestamp DESC",
+      [nickname]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching highlights:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Получить социальные сети пользователя
+app.get("/api/user/:nickname/social-media", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT platform, username, followers FROM social_media WHERE user_id = (SELECT id FROM users WHERE nickname = $1)",
+      [nickname]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching social media:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 Получить друзей пользователя
+app.get("/api/user/:nickname/friends", async (req, res) => {
+  const { nickname } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT u.id, u.nickname FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = (SELECT id FROM users WHERE nickname = $1)",
+      [nickname]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching friends:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // 🚀 Запуск сервера
 server.listen(PORT, () => {

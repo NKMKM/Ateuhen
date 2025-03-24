@@ -6,10 +6,11 @@ import NavBar from "./ProfileComponents/NavBar";
 import ProfileContent from "./ProfileComponents/ProfileContent";
 
 function ProfilePage({ user }) {
-  const { nickname } = useParams();
+  const { nickname } = useParams(); // Получаем nickname из URL
   const { currentUserId } = useAuth();
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Загрузка данных пользователя
   useEffect(() => {
@@ -23,6 +24,7 @@ function ProfilePage({ user }) {
         setProfileUser(data);
       } catch (error) {
         console.error("Error fetching user:", error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -32,15 +34,24 @@ function ProfilePage({ user }) {
   }, [nickname]);
 
   if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
   if (!profileUser) return <div>User not found</div>;
 
   return (
     <div className="flex w-full min-h-screen bg-black text-white">
       <NavBar />
       <main className="flex-1 min-h-screen relative">
-        <ProfileHeader key={profileUser.id} id={profileUser.id} currentUserId={currentUserId} />
+        {/* Передаем данные пользователя в ProfileHeader */}
+        <ProfileHeader
+          key={profileUser.id}
+          id={profileUser.id}
+          currentUserId={currentUserId}
+          nickname={profileUser.nickname}
+          avatar={profileUser.avatar}
+        />
         <div className="relative z-10 -mt-[20vh]">
-          <ProfileContent activeTab="profile" />
+          {/* Передаем nickname и данные пользователя в ProfileContent */}
+          <ProfileContent activeTab="profile" nickname={nickname} profileUser={profileUser} />
         </div>
       </main>
     </div>
