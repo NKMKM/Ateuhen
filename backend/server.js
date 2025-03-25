@@ -55,6 +55,19 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
+  socket.on('updateAvatar', async ({ nickname, avatarPath }) => {
+    try {
+      await pool.query(
+        "UPDATE users SET avatar_path = $1 WHERE nickname = $2",
+        [avatarPath, nickname]
+      );
+      // Рассылаем обновление всем клиентам
+      io.emit('avatarUpdated', { nickname, avatarPath });
+    } catch (err) {
+      console.error('Error updating avatar:', err);
+    }
+  });
+
   socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
     try {
       const senderRes = await pool.query("SELECT id, nickname FROM users WHERE id = $1", [senderId]);
@@ -532,27 +545,29 @@ app.put("/api/user/:nickname/avatar", upload.single("avatar"), async (req, res) 
 
   try {
     const fileName = `${Date.now()}-${file.originalname}`;
-    const relativePath = path.join("uploads", fileName); // Относительный путь
-    const absolutePath = path.join(__dirname, relativePath); // Абсолютный путь для сохранения файла
+    const relativePath = path.join("uploads", fileName);
+    const absolutePath = path.join(__dirname, relativePath);
 
-    // Перемещаем файл из временной папки в папку uploads
     fs.renameSync(file.path, absolutePath);
 
-    // Сохраняем относительный путь к файлу в базу данных
     await pool.query("UPDATE users SET avatar_path = $1 WHERE nickname = $2", [relativePath, nickname]);
 
-    res.json({ message: "Avatar updated successfully", avatarPath: relativePath });
+    // Отправляем событие обновления через WebSocket
+    io.emit('avatarUpdated', { nickname, avatarPath: relativePath });
+
+    res.json({ 
+      message: "Avatar updated successfully", 
+      avatarPath: relativePath 
+    });
   } catch (err) {
     console.error("Error updating avatar:", err);
-
-    // Удаляем временный файл в случае ошибки
     if (file && fs.existsSync(file.path)) {
       fs.unlinkSync(file.path);
     }
-
     res.status(500).json({ message: "Server error" });
   }
 });
+
 // 🔹 Получить аватар пользователя
 app.get("/api/user/:nickname/avatar", async (req, res) => {
   const { nickname } = req.params;
