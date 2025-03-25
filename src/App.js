@@ -15,6 +15,7 @@ import Lobby from "./pages/Lobby";
 import SettingsPage from "./pages/SettingsPage";
 import Scrollbar from "./components/ScrollBar";
 import ProfilePage from "./pages/ProfilePage";
+import Loading from "./components/Loading";
 
 function App() {
   const [user, setUser] = useState(undefined);
@@ -37,7 +38,7 @@ function App() {
     checkAuth();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading loading={loading} />;
 
   return (
     <AuthProvider>
