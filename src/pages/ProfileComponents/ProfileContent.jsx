@@ -297,7 +297,7 @@ const ProfileContent = ({ activeTab, nickname, profileUser: initialProfileUser }
                     <img
                       src={avatar}
                       alt="Profile Avatar"
-                      className="w-32 h-32  border-4 border-black object-cover hover:grayscale-0 grayscale transition-all"
+                      className="w-32 h-32 rounded-full border-4 border-black object-cover hover:grayscale-0 grayscale transition-all"
                     />
                     <label className="absolute bottom-2 right-0 bg-black/80 text-white p-2 rounded-full cursor-pointer hover:bg-white hover:text-black transition-all opacity-0 group-hover:opacity-100 z-10">
                       <input
