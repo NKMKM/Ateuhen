@@ -18,7 +18,6 @@ const upload = multer({
   dest: "uploads/",
   limits: { fileSize: 5 * 1024 * 1024 }, // Ограничение на 5 МБ
 });
-
 app.use(useragent.express());
 app.use(express.json());
 app.use(cookieParser());
@@ -155,6 +154,17 @@ app.get("/api/user/:id/banner", (req, res) => {
     res.status(404).send("Banner not found");
   }
 });
+
+app.get("/api/user/:id/stats", (req, res) => {
+  const userId = req.params.id;
+  const bannerPath = path.join(bannersDir, `${userId}.jpg`);
+
+  if (fs.existsSync(bannerPath)) {
+    res.sendFile(bannerPath);
+  } else {
+    res.status(404).send("Banner not found");
+  }
+})
 
 // 🔹 Регистрация пользователя
 app.post("/auth/register", asyncHandler(async (req, res) => {
